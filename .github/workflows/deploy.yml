@@ -27,10 +27,11 @@ jobs:
       - name: Build with Astro
         # Installs deps, runs `astro build`, and uploads ./dist as the Pages artifact.
         uses: withastro/action@v3
-        # with:
-        #   path: .            # root of the Astro project
-        #   node-version: 22   # pin if you need a specific Node
-        #   package-manager: npm
+        with:
+          # Astro 7 requires Node >=22.12; withastro/action defaults to Node 20.
+          node-version: 22
+          # path: .            # root of the Astro project (default)
+          # package-manager: npm
 
   deploy:
     needs: build
