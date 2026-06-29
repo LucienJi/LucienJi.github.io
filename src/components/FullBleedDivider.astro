@@ -1,0 +1,63 @@
+---
+// FullBleedDivider — a single full-bleed photographic band used as a section
+// divider between major sections (DESIGN.md §6.21). Use SPARINGLY (home +
+// research). The image is cover-cropped into a bounded editorial band so it
+// reads as a calm divider, never towering on ultrawide nor vanishing on mobile.
+// An optional mono caption sits bottom-left as a small "plate-label" placard.
+//
+//   <FullBleedDivider src="aurora-wide.jpg" alt="Aurora over a frozen lake" />
+//   <FullBleedDivider src="lab-bench.jpg" alt="…" caption="Hokkaido, 2024" />
+import ResponsiveImage from "@components/ResponsiveImage.astro";
+
+interface Props {
+  /** Image BASENAME resolved from src/assets/** (never a path). */
+  src: string;
+  /** REQUIRED. Meaningful description; pass "" only for a purely decorative band. */
+  alt: string;
+  /** Optional mono caption, pinned bottom-left as a small plate label. */
+  caption?: string;
+}
+const { src, alt, caption } = Astro.props;
+---
+
+<figure class="fbd full-bleed">
+  <ResponsiveImage src={src} alt={alt} sizes="100vw" />
+  {caption && <figcaption class="fbd__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .fbd {
+    position: relative;
+    /* Deliberate band height — an editorial dimension outside the spacing
+       rhythm scale — clamped so the divider stays restrained at every width. */
+    --fbd-band-h: clamp(220px, 36vh, 460px);
+  }
+
+  /* Re-shape the shared ResponsiveImage into a wide, edge-to-edge band.
+     Height is fixed (known at layout) so this stays zero-CLS; object-fit:cover
+     and width:100% are already set on .rimg__img by ResponsiveImage. */
+  .fbd :global(.rimg__img) {
+    height: var(--fbd-band-h);
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+
+  /* Mono "plate-label" placard — solid --surface keeps it legible (AA) over
+     any photograph without drawing telemetry/overlays on the image itself. */
+  .fbd__caption {
+    position: absolute;
+    left: var(--page-gutter);
+    bottom: var(--space-4);
+    max-width: min(40ch, calc(100% - 2 * var(--page-gutter)));
+    padding: var(--space-1) var(--space-3);
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+</style>

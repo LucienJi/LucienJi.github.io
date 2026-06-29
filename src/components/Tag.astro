@@ -1,0 +1,90 @@
+---
+/**
+ * Tag — a mono filter / label chip.
+ *
+ * Renders a base-aware <a> when `href` is given, a toggle <button> when
+ * `pressed` is supplied, otherwise a static <span>.
+ * When active, it carries the cobalt-on-`--accent-soft` treatment PLUS a
+ * non-color cue (font-weight + underline) and the matching state attribute
+ * (`aria-pressed` for the toggle variant, `aria-current` for an active link),
+ * because color is never the only signal (DESIGN §10). Composes design tokens only.
+ */
+import { withBase, isExternal } from "@lib/url";
+
+interface Props {
+  label: string;
+  href?: string;
+  active?: boolean;
+  pressed?: boolean;
+  class?: string;
+}
+
+const { label, href, active = false, pressed, class: className = "" } = Astro.props;
+
+const isToggle = pressed !== undefined;
+const ext = href ? isExternal(href) : false;
+const Tag = href ? "a" : isToggle ? "button" : "span";
+const hrefAttr = href ? (ext ? href : withBase(href)) : undefined;
+const isActive = isToggle ? pressed : active; // toggle's visual active follows pressed
+---
+
+<Tag
+  class={`tag${isActive ? " tag--active" : ""} ${className}`}
+  href={hrefAttr}
+  type={isToggle ? "button" : undefined}
+  target={ext ? "_blank" : undefined}
+  rel={ext ? "noopener noreferrer" : undefined}
+  aria-pressed={isToggle ? (pressed ? "true" : "false") : undefined}
+  aria-current={!isToggle && active ? "true" : undefined}
+>{label}</Tag>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--space-8); /* 32px — comfortable ≥24px hit area */
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background var(--dur) var(--ease),
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+
+  /* Interactive (link/button) affordance — :focus-visible parity with :hover. */
+  a.tag:hover,
+  a.tag:focus-visible,
+  button.tag:hover,
+  button.tag:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Active filter: cobalt on --accent-soft + non-color cue (weight + underline). */
+  .tag--active {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: transparent; /* keep the 1px box so active/inactive never reflow */
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  a.tag--active:hover,
+  a.tag--active:focus-visible,
+  button.tag--active:hover,
+  button.tag--active:focus-visible {
+    color: var(--accent-press);
+    border-color: var(--accent);
+  }
+</style>

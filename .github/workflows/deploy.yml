@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Deploy on every push to the default branch …
+  push:
+    branches: [main]
+  # … and allow manual runs from the Actions tab.
+  workflow_dispatch:
+
+# Allow GITHUB_TOKEN to deploy to Pages + use OIDC for the deploy step.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One concurrent deploy; don't cancel an in-progress production deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build with Astro
+        # Installs deps, runs `astro build`, and uploads ./dist as the Pages artifact.
+        uses: withastro/action@v3
+        # with:
+        #   path: .            # root of the Astro project
+        #   node-version: 22   # pin if you need a specific Node
+        #   package-manager: npm
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

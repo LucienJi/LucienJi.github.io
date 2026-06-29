@@ -1,0 +1,18 @@
+title: "Self-Supervised Visual Representations for Robotic Grasping"
+authors:
+  - "Your Name"
+  - "E. Vision"
+  - "S. Advisor"
+venue: "CVPR Workshop on Robotic Vision"
+year: 2023
+type: "workshop"
+links:
+  pdf: "#"
+  arxiv: "https://arxiv.org/abs/0000.00000"
+  bibtex: "@inproceedings{yourname2023perception,\n  title={Self-Supervised Visual Representations for Robotic Grasping},\n  author={Name, Your},\n  booktitle={CVPRW},\n  year={2023}\n}"
+oneLiner: "Pretraining on unlabeled robot video improves downstream grasp success."
+tags:
+  - "perception"
+  - "self-supervised"
+  - "manipulation"
+selected: false

@@ -1,0 +1,164 @@
+---
+// §7.7 — /about (Author's Note + contact hub).
+// Frontispiece portrait (pure-white mat, keyline) alongside a first-person bio
+// in the reading measure, an Interests/Hobbies ledger (mono labels + serif
+// notes), and the shared ContactBlock. Static page — no island required.
+import BaseLayout from "@layouts/BaseLayout.astro";
+import ResponsiveImage from "@components/ResponsiveImage.astro";
+import Prose from "@components/Prose.astro";
+import ContactBlock from "@components/ContactBlock.astro";
+import Eyebrow from "@components/Eyebrow.astro";
+import SectionMarker from "@components/SectionMarker.astro";
+import { site } from "@data/site";
+import { getCollection, render } from "astro:content";
+
+const about = (await getCollection("about"))[0];
+const { Content } = await render(about);
+
+const interests = about.data.interests ?? [];
+const portrait = about.data.portrait;
+// Honest frontispiece caption from central config (mono meta grammar).
+const portraitMeta = [site.role, site.university].filter(Boolean).join(" · ");
+// Page-specific meta description: first paragraph of the bio, normalized and
+// trimmed to a clean word boundary (<=160 chars). Falls back to site.description
+// via BaseLayout when the body is empty.
+const description = about.body?.split(/\n\s*\n/)[0]?.replace(/\s+/g, " ").trim().slice(0, 155).replace(/\s+\S*$/, "");
+---
+
+<BaseLayout title="About" description={description}>
+  <article class="about wrap-wide section">
+    <header class="about__head">
+      <Eyebrow>§ About — Author's Note</Eyebrow>
+      <h1 class="about__name">{site.name}</h1>
+    </header>
+
+    <div class="about__author">
+      {
+        portrait && (
+          <figure class="about__portrait">
+            <ResponsiveImage
+              src={portrait}
+              alt={`Portrait of ${site.name}`}
+              mat
+              priority
+              widths={[240, 320, 480, 640, 720]}
+              sizes="(min-width: 820px) 320px, 360px"
+            />
+            {portraitMeta && (
+              <figcaption class="about__portrait-cap meta">{portraitMeta}</figcaption>
+            )}
+          </figure>
+        )
+      }
+
+      <div class="about__bio">
+        <Prose dropCap><Content /></Prose>
+      </div>
+    </div>
+
+    {
+      interests.length > 0 && (
+        <section class="about__block" aria-labelledby="about-interests">
+          <SectionMarker number={1} label="Interests & Hobbies" />
+          <h2 id="about-interests" class="u-visually-hidden">
+            Interests and hobbies
+          </h2>
+          <dl class="interests">
+            {interests.map((it) => (
+              <div class="interests__row">
+                <dt class="interests__label">{it.label}</dt>
+                <dd class="interests__note">{it.note}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )
+    }
+
+    <section class="about__block" aria-labelledby="about-contact">
+      <SectionMarker number={interests.length > 0 ? 2 : 1} label="Contact" />
+      <h2 id="about-contact" class="u-visually-hidden">Contact</h2>
+      <ContactBlock />
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .about__head {
+    margin-bottom: var(--space-12);
+  }
+  .about__name {
+    margin-top: var(--space-3);
+  }
+
+  /* Frontispiece: portrait beside (or above) the bio. */
+  .about__author {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-16);
+  }
+  .about__portrait {
+    margin: 0;
+    max-width: 360px;
+  }
+  .about__portrait-cap {
+    margin-top: var(--space-3);
+  }
+  .about__bio {
+    min-width: 0; /* let the prose column shrink instead of overflowing */
+  }
+
+  @media (min-width: 820px) {
+    .about__author {
+      grid-template-columns: clamp(240px, 30vw, 320px) minmax(0, var(--measure-read));
+      gap: var(--space-12);
+      align-items: start;
+      justify-content: start;
+    }
+    .about__portrait {
+      max-width: none;
+    }
+  }
+
+  /* Lower sections. */
+  .about__block + .about__block {
+    margin-top: var(--space-16);
+  }
+
+  /* Interests / hobbies — a hairline ledger: mono label · serif note. */
+  .interests {
+    max-width: var(--measure-read);
+    border-bottom: 1px solid var(--line);
+  }
+  .interests__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--line);
+  }
+  .interests__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .interests__note {
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 720px) {
+    .interests__row {
+      grid-template-columns: minmax(120px, 160px) 1fr;
+      gap: var(--space-6);
+      align-items: baseline;
+    }
+    .interests__label {
+      text-align: right;
+    }
+  }
+</style>

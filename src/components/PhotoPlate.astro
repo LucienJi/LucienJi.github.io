@@ -1,0 +1,148 @@
+---
+// PhotoPlate — one "hung print": a matted ResponsiveImage + a mono caption,
+// wrapped as a single <button> that triggers the page's Lightbox island
+// (DESIGN.md §6.14 / §8). Compose this inside Gallery / PhotoEssay / the home
+// strip. Photographs are ALWAYS shown clean — no reticles, boxes or telemetry
+// are ever drawn on the image; hover/focus only lifts the plate 2px and shifts
+// its keyline toward the accent.
+//
+// The caption uses the SAME mono "instrument" as research metadata (place/year
+// ≡ venue/year): a primary line plus an optional EXIF marginalia line.
+//
+// Lightbox contract — this button carries, for the single Lightbox instance to
+// read on `astro:page-load`:
+//   data-lightbox-trigger  — marks the element as an ordered gallery trigger
+//   data-src               — a large AVIF URL (base-correct, via astro:assets)
+//   data-alt               — the photograph's alt text (becomes the dialog img alt)
+//   data-caption           — the primary caption line (place/plate label)
+//
+//   <PhotoPlate photo={entry.data} plateLabel="Plate IV — Kyoto, 2024" />
+//   <PhotoPlate photo={entry.data} priority sizes="(min-width:1140px) 540px, 100vw" />
+import { getImage } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import ResponsiveImage from "@components/ResponsiveImage.astro";
+import { mustResolveImage } from "@lib/images";
+
+interface Props {
+  /** A photo collection entry's `.data` (see content.config.ts → photos). */
+  photo: CollectionEntry<"photos">["data"];
+  /** Pre-formatted plate label, e.g. "Plate IV — Kyoto, 2024". When omitted,
+      the caption is composed from `photo.caption` + location/year. */
+  plateLabel?: string;
+  /** Forwarded to ResponsiveImage for correct srcset selection. */
+  sizes?: string;
+  /** Eager-load this plate (use for an above-the-fold / LCP plate). */
+  priority?: boolean;
+  /** Extra classes on the root <button>. */
+  class?: string;
+}
+const { photo, plateLabel, sizes, priority = false, class: className = "" } = Astro.props;
+
+// Mono caption grammar — "{place}, {year}" rhymes with a paper's "{venue} {year}".
+const locYear = [photo.location, photo.year].filter(Boolean).join(", ");
+// Primary line: an explicit plate label wins; else caption — place, year.
+const primaryCaption =
+  plateLabel || [photo.caption, locYear].filter(Boolean).join(" — ");
+
+// Optional EXIF marginalia, e.g. "35mm · 1/125s · f/2.8 · ISO 400" (skip blanks).
+const exif = photo.exif;
+const exifLine = exif
+  ? [exif.focal, exif.shutter, exif.aperture, exif.iso].filter(Boolean).join(" · ")
+  : "";
+
+// A large image URL for the lightbox. astro:assets emits this base-correct, so
+// it must NOT be wrapped with withBase().
+const large = await getImage({
+  src: mustResolveImage(photo.src),
+  width: 2000,
+  format: "avif",
+});
+---
+
+<button
+  type="button"
+  class={`plate ${className}`.trim()}
+  data-lightbox-trigger
+  data-src={large.src}
+  data-alt={photo.alt}
+  data-caption={primaryCaption}
+  aria-haspopup="dialog"
+>
+  <span class="plate__media">
+    <ResponsiveImage
+      src={photo.src}
+      alt={photo.alt}
+      mat
+      aspect={photo.aspect}
+      sizes={sizes}
+      priority={priority}
+    />
+  </span>
+
+  {
+    (primaryCaption || exifLine) && (
+      <span class="plate__caption">
+        {primaryCaption && <span class="plate__line meta">{primaryCaption}</span>}
+        {exifLine && <span class="plate__exif meta">{exifLine}</span>}
+      </span>
+    )
+  }
+</button>
+
+<style>
+  /* The whole plate (print + caption) is one click target. Most button chrome
+     is already reset globally; we only need the block layout + the lift. */
+  .plate {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .plate__media {
+    display: block;
+  }
+
+  /* The matted print is drawn by ResponsiveImage (`mat`). We compose — never
+     overlay — by transitioning only its 1px keyline so it warms toward the
+     accent on interaction. The image itself stays untouched. */
+  .plate :global(.rimg--mat) {
+    transition: border-color var(--dur) var(--ease);
+  }
+
+  /* Hover/focus lifts the plate 2px. The visible focus ring is handled globally
+     via :focus-visible on the button. */
+  .plate:hover,
+  .plate:focus-visible {
+    transform: translateY(-2px);
+  }
+  .plate:hover :global(.rimg--mat),
+  .plate:focus-visible :global(.rimg--mat) {
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+  }
+
+  /* Mono caption — the shared "instrument" voice (.meta = mono / small / faint). */
+  .plate__caption {
+    display: block;
+    margin-top: var(--space-3);
+  }
+  .plate__line,
+  .plate__exif {
+    display: block;
+    line-height: 1.4;
+  }
+  .plate__exif {
+    margin-top: var(--space-1);
+  }
+
+  /* Reduced motion: no lift (the keyline tint, a non-motion cue, remains). */
+  @media (prefers-reduced-motion: reduce) {
+    .plate:hover,
+    .plate:focus-visible {
+      transform: none;
+    }
+  }
+</style>

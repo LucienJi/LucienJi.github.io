@@ -1,0 +1,85 @@
+---
+import { site } from "../data/site";
+import { withBase } from "../lib/url";
+
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+
+const icons: Record<string, string> = {
+  email: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>`,
+  scholar: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-4.5"/><path d="M22 9v5"/></svg>`,
+  github: `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11 11 0 0 1 6 0C18.7 4.7 19.7 5 19.7 5c.6 1.6.2 2.9.1 3.2.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5z"/></svg>`,
+  linkedin: `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33 0-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>`,
+  twitter: `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.96 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23zm-1.16 17.52h1.83L7.08 4.13H5.12z"/></svg>`,
+  orcid: `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zM7.37 18.06H5.6V7.93h1.77zM6.48 6.77a1.03 1.03 0 1 1 0-2.06 1.03 1.03 0 0 1 0 2.06zm12.04 11.29h-1.76v-4.93c0-1.18-.02-2.69-1.64-2.69-1.64 0-1.89 1.28-1.89 2.6v5.02h-1.76V7.93h1.69v.92h.02c.24-.45.81-.92 1.67-.92 1.79 0 2.12 1.18 2.12 2.71z"/></svg>`,
+  cv: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>`,
+};
+
+type Item = { k: string; label: string; href: string };
+const items: Item[] = [];
+if (site.email) items.push({ k: "email", label: "Email", href: `mailto:${site.email}` });
+if (site.socials.scholar) items.push({ k: "scholar", label: "Google Scholar", href: site.socials.scholar });
+if (site.socials.github) items.push({ k: "github", label: "GitHub", href: site.socials.github });
+if (site.socials.linkedin) items.push({ k: "linkedin", label: "LinkedIn", href: site.socials.linkedin });
+if (site.socials.twitter) items.push({ k: "twitter", label: "Twitter", href: site.socials.twitter });
+if (site.socials.orcid) items.push({ k: "orcid", label: "ORCID", href: site.socials.orcid });
+if (site.cvPdf) items.push({ k: "cv", label: "CV (PDF)", href: withBase(site.cvPdf) });
+
+const isHttp = (h: string) => h.startsWith("http");
+---
+
+<ul class={`contact ${className}`} role="list">
+  {
+    items.map((it) => (
+      <li>
+        <a
+          class="contact__link"
+          href={it.href}
+          target={isHttp(it.href) ? "_blank" : undefined}
+          rel={isHttp(it.href) ? "noopener noreferrer" : undefined}
+        >
+          <span class="contact__icon" aria-hidden="true" set:html={icons[it.k]} />
+          <span class="contact__label">{it.label}</span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    padding: 0;
+  }
+  .contact__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+  }
+  .contact__icon {
+    display: inline-flex;
+    color: var(--faint);
+    transition: color var(--dur) var(--ease);
+  }
+  .contact__link:hover,
+  .contact__link:focus-visible { color: var(--ink); }
+  .contact__link:hover .contact__icon,
+  .contact__link:focus-visible .contact__icon { color: var(--accent); }
+  .contact__label {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+  .contact__link:hover .contact__label,
+  .contact__link:focus-visible .contact__label { text-decoration: underline; }
+</style>

@@ -1,0 +1,115 @@
+---
+import "@fontsource-variable/newsreader/index.css";
+import "@fontsource-variable/newsreader/wght-italic.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource-variable/inter/index.css";
+import "../styles/tokens.css";
+import "../styles/global.css";
+
+import { ClientRouter } from "astro:transitions";
+import { site } from "../data/site";
+import { withBase } from "../lib/url";
+import SkipLink from "../components/SkipLink.astro";
+import Masthead from "../components/Masthead.astro";
+import Colophon from "../components/Colophon.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string; // OG image: absolute URL or site-relative path
+  imageAlt?: string; // alt text for the OG/Twitter card image
+  /** Force a theme regardless of user preference (gallery routes use "dark"). */
+  forceTheme?: "dark" | "light";
+  bodyClass?: string;
+}
+const {
+  title,
+  description = site.description,
+  image = "/og.jpg",
+  imageAlt = `${site.name} — ${site.role}`,
+  forceTheme,
+  bodyClass = "",
+} = Astro.props;
+
+const pageTitle = title ? `${title} — ${site.name}` : `${site.name} · ${site.role}`;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const ogImage = image.startsWith("http") ? image : new URL(withBase(image), site.url).href;
+
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.name,
+  jobTitle: site.role,
+  affiliation: { "@type": "Organization", name: site.university },
+  url: site.url,
+  sameAs: Object.values(site.socials).filter(Boolean),
+};
+---
+
+<!doctype html>
+<html lang="en" data-force-theme={forceTheme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="generator" content={Astro.generator} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(personLd)} />
+
+    <!-- No-flash theme init: runs before first paint. -->
+    <script is:inline>
+      (function () {
+        try {
+          var el = document.documentElement;
+          var force = el.getAttribute("data-force-theme");
+          var theme =
+            force ||
+            localStorage.getItem("theme") ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          el.setAttribute("data-theme", theme);
+        } catch (e) {}
+      })();
+    </script>
+
+    <ClientRouter />
+  </head>
+  <body class={bodyClass}>
+    <SkipLink />
+    <Masthead plateMode={forceTheme === "dark"} />
+    <main id="main" tabindex="-1"><slot /></main>
+    <Colophon />
+
+    <!-- Re-apply theme after client-side view transitions (bundled, runs once). -->
+    <script>
+      const applyTheme = () => {
+        try {
+          const el = document.documentElement;
+          const force = el.getAttribute("data-force-theme");
+          const theme =
+            force ||
+            localStorage.getItem("theme") ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          el.setAttribute("data-theme", theme);
+        } catch (e) {}
+      };
+      document.addEventListener("astro:after-swap", applyTheme);
+    </script>
+  </body>
+</html>

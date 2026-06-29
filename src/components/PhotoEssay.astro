@@ -1,0 +1,231 @@
+---
+// PhotoEssay — a photographic series presented as an editorial essay
+// (DESIGN.md §6.17 / §7.5 / §7.6 / §8.2). It renders:
+//
+//   1. A series HEADER in the margin-rail "spread": a roman folio + a "Series"
+//      kicker + mono meta "location · year · N frames" in the rail; the title
+//      and intro paragraph in the reading column.
+//   2. An aspect-respecting SEQUENCE driven by each photo's `span`:
+//        • span "full"  → a full-bleed single plate (immersive, edge-to-edge)
+//        • otherwise    → consecutive plates are grouped into a diptych/cluster
+//                         (<SeriesSpread>, ≤3) or a justified mosaic
+//                         (<Gallery>, ≥4) — never a uniform tile dump.
+//
+// Plates are numbered continuously in reading order ("Plate I, II, …") and every
+// plate opens the shared <Lightbox> (include ONE per page) via <PhotoPlate>.
+//
+// `series` is a series entry's `.data`; `photos` are photo ENTRIES (sorted here
+// by `order`). The series title renders as <h2> by default — pass `titleAs="h1"`
+// when this essay supplies the page's single <h1> (e.g. /photography/[series]).
+// Outer rhythm is the consumer's job: wrap in <section class="section"> or
+// separate multiple essays on an index page.
+//
+//   <PhotoEssay series={seriesEntry.data} photos={photoEntries} />
+//   <PhotoEssay series={s.data} photos={ps} titleAs="h1" priority />
+import type { CollectionEntry } from "astro:content";
+import PhotoPlate from "@components/PhotoPlate.astro";
+import SeriesSpread from "@components/SeriesSpread.astro";
+import Gallery from "@components/Gallery.astro";
+
+interface Props {
+  /** A series entry's `.data` (see content.config.ts → series). */
+  series: CollectionEntry<"series">["data"];
+  /** Photo ENTRIES belonging to this series (sorted here by `order`). */
+  photos: CollectionEntry<"photos">[];
+  /** Heading element for the series title. Default "h2"; use "h1" only when this
+      essay is the page's sole <h1>. */
+  titleAs?: "h1" | "h2" | "h3";
+  /** Eager-load the first plate when this essay is the page's hero / LCP. */
+  priority?: boolean;
+  /** Extra classes on the root <section>. */
+  class?: string;
+}
+const {
+  series,
+  photos = [],
+  titleAs = "h2",
+  priority = false,
+  class: className = "",
+} = Astro.props;
+
+const Title = titleAs;
+
+function toRoman(num: number): string {
+  if (!Number.isFinite(num) || num <= 0) return String(num);
+  const table: [number, string][] = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"],
+    [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"],
+    [5, "V"], [4, "IV"], [1, "I"],
+  ];
+  let n = Math.floor(num);
+  let out = "";
+  for (const [value, sym] of table) while (n >= value) { out += sym; n -= value; }
+  return out;
+}
+function plateLabel(data: CollectionEntry<"photos">["data"], n: number): string {
+  const place = [data.location, data.year].filter(Boolean).join(", ");
+  const tail = place || data.caption || "";
+  return tail ? `Plate ${toRoman(n)} — ${tail}` : `Plate ${toRoman(n)}`;
+}
+
+// --- Header meta: "location · year · N frames" -------------------------------
+const frames = photos.length;
+const metaLine = [
+  series.location,
+  series.year,
+  frames ? `${frames} frame${frames === 1 ? "" : "s"}` : "",
+]
+  .filter(Boolean)
+  .join(" · ");
+
+// --- Sequence: order, then split into full-bleed singles vs grouped spreads ---
+const ordered = [...photos].sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+
+type Block =
+  | { kind: "full"; entry: CollectionEntry<"photos">; plate: number }
+  | { kind: "spread"; entries: CollectionEntry<"photos">[]; startPlate: number }
+  | { kind: "gallery"; entries: CollectionEntry<"photos">[]; startPlate: number };
+
+const blocks: Block[] = [];
+let buffer: CollectionEntry<"photos">[] = [];
+let bufferStart = 1;
+
+function flush() {
+  if (buffer.length === 0) return;
+  blocks.push(
+    buffer.length >= 4
+      ? { kind: "gallery", entries: buffer, startPlate: bufferStart }
+      : { kind: "spread", entries: buffer, startPlate: bufferStart },
+  );
+  buffer = [];
+}
+
+ordered.forEach((entry, i) => {
+  const plate = i + 1; // continuous 1-based plate number, in reading order
+  if (entry.data.span === "full") {
+    flush();
+    blocks.push({ kind: "full", entry, plate });
+  } else {
+    if (buffer.length === 0) bufferStart = plate;
+    buffer.push(entry);
+  }
+});
+flush();
+---
+
+<section class={`pe ${className}`.trim()}>
+  <header class="pe__head wrap-wide">
+    <div class="pe__head-grid spread">
+      <div class="rail pe__rail">
+        <span class="pe__roman">{series.roman}</span>
+        <span class="pe__kicker">Series</span>
+        {metaLine && <span class="pe__meta meta">{metaLine}</span>}
+      </div>
+      <div class="main pe__lead">
+        <Title class="pe__title">{series.title}</Title>
+        {series.intro && <p class="pe__intro lede">{series.intro}</p>}
+      </div>
+    </div>
+  </header>
+
+  {
+    blocks.length > 0 && (
+      <div class="pe__sequence">
+        {blocks.map((block, bi) =>
+          block.kind === "full" ? (
+            <div class="pe__full full-bleed">
+              <PhotoPlate
+                photo={block.entry.data}
+                plateLabel={plateLabel(block.entry.data, block.plate)}
+                priority={priority && bi === 0}
+                sizes="100vw"
+              />
+            </div>
+          ) : block.kind === "gallery" ? (
+            <Gallery
+              photos={block.entries}
+              startPlate={block.startPlate}
+              priority={priority && bi === 0}
+            />
+          ) : (
+            <SeriesSpread
+              photos={block.entries}
+              startPlate={block.startPlate}
+              priority={priority && bi === 0}
+            />
+          ),
+        )}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  /* Outer rhythm is owned by the consumer; the essay manages only its internals. */
+  .pe {
+    margin: 0;
+  }
+
+  /* ---------- Series header (margin-rail "spread") ---------- */
+  .pe__rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  /* Roman folio: a large mono numeral that reads as a plate-section marker. */
+  .pe__roman {
+    font-family: var(--font-mono);
+    font-size: var(--fs-h2);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .pe__kicker {
+    font-family: var(--font-mono);
+    font-size: var(--fs-eyebrow);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+  }
+  .pe__meta {
+    margin-top: var(--space-1);
+  }
+
+  .pe__title {
+    margin: 0;
+  }
+  .pe__intro {
+    margin-top: var(--space-4);
+  }
+
+  /* ---------- Sequence ---------- */
+  .pe__sequence {
+    margin-top: var(--space-12);
+  }
+  .pe__sequence > * + * {
+    margin-top: var(--space-16);
+  }
+
+  /* Full-bleed single: the print bleeds edge-to-edge (mat dropped), height-capped
+     so a tall frame never towers; its mono caption pulls back into the gutter and
+     aligns to the wide measure. 88vh is a geometry cap, not a spacing token. */
+  .pe__full :global(.rimg--mat) {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .pe__full :global(.rimg__img) {
+    border-radius: 0;
+    width: 100%;
+    max-height: 88vh;
+    object-fit: cover;
+  }
+  .pe__full :global(.plate__caption) {
+    width: min(100%, var(--measure-wide));
+    margin-inline: auto;
+    margin-top: var(--space-4);
+    padding-inline: var(--page-gutter);
+  }
+</style>

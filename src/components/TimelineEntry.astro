@@ -1,0 +1,109 @@
+---
+/**
+ * TimelineEntry — one row of the CV Timeline (DESIGN.md §6.22, §7.4).
+ *
+ * Renders an <li> built on the global `.spread` margin-rail grid:
+ *   .rail  → the mono, tabular date range ("start — end", or "start — Present"
+ *            when `end` is omitted; collapses to a single date when start===end)
+ *   .main  → role (serif voice) + org · location (meta) + one-line summary
+ *
+ * Designed to be rendered inside <Timeline>'s grouped <ul role="list">.
+ */
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  entry: CollectionEntry<"timeline">;
+}
+
+const { entry } = Astro.props;
+const { role, org, location, start, end, summary } = entry.data;
+
+// A point-in-time entry (e.g. an award conferred in one year) collapses to a
+// single date; otherwise show a range, falling back to "Present" with no `end`.
+const samePoint = end !== undefined && end === start;
+---
+
+<li class="tl-entry spread">
+  <div class="rail">
+    <span class="tl-entry__dates">
+      {
+        samePoint ? (
+          <time datetime={start}>{start}</time>
+        ) : (
+          <Fragment>
+            <span aria-hidden="true">
+              <time datetime={start}>{start}</time> —{" "}
+              {end ? <time datetime={end}>{end}</time> : "Present"}
+            </span>
+            <span class="u-visually-hidden">{start} to {end ?? "present"}</span>
+          </Fragment>
+        )
+      }
+    </span>
+  </div>
+
+  <div class="main">
+    <p class="tl-entry__role">{role}</p>
+    <p class="tl-entry__org">
+      <span class="tl-entry__org-name">{org}</span>
+      {
+        location && (
+          <Fragment>
+            <span class="tl-entry__sep" aria-hidden="true"> · </span>
+            <span class="tl-entry__loc">{location}</span>
+          </Fragment>
+        )
+      }
+    </p>
+    {summary && <p class="tl-entry__summary">{summary}</p>}
+  </div>
+</li>
+
+<style>
+  /* Mono date range in the rail. Font family + faint colour + right-alignment
+     come from the global `.spread > .rail` rule; we only pin tabular figures. */
+  .tl-entry__dates {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Role — the serif "voice", the row title. */
+  .tl-entry__role {
+    font-family: var(--font-serif);
+    font-size: var(--fs-h3);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  /* Org + location line. */
+  .tl-entry__org {
+    margin-top: var(--space-1);
+    font-family: var(--font-serif);
+    font-size: var(--fs-body);
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .tl-entry__sep {
+    color: var(--faint);
+  }
+  .tl-entry__loc {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    color: var(--faint);
+  }
+
+  /* One-line plain-language summary. */
+  .tl-entry__summary {
+    margin-top: var(--space-2);
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  /* Below 1024px .spread collapses to 1fr; preserve the 720px cap the desktop
+     grid track (minmax(0,var(--measure-read))) gives the main column. */
+  .main {
+    max-width: var(--measure-read);
+  }
+</style>

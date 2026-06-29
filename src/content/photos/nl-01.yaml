@@ -1,0 +1,16 @@
+src: "nl-01.jpg"
+series: "northern-light"
+order: 1
+span: "full"
+selected: true
+location: "Tromsø, Norway"
+year: 2024
+caption: "Aurora over the ridge"
+alt: "Green aurora over a dark mountain ridge."
+exif:
+  camera: "Sony A7 IV"
+  lens: "16–35mm f/2.8"
+  focal: "20mm"
+  shutter: "8s"
+  aperture: "f/2.8"
+  iso: "ISO 1600"

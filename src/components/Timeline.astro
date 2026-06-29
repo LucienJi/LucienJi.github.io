@@ -1,0 +1,84 @@
+---
+/**
+ * Timeline — grouped CV / experience list (DESIGN.md §6.22, §7.4).
+ *
+ * Groups `timeline` collection entries into Education / Industry & Internships /
+ * Service & Teaching / Awards (in that order; only non-empty groups render),
+ * each introduced by a mono subhead. Within a group, entries sort by `start`
+ * descending. Each row is a `.spread`: mono date range in the `.rail`,
+ * role/org/location/summary in the `.main` (see TimelineEntry).
+ */
+import type { CollectionEntry } from "astro:content";
+import TimelineEntry from "@components/TimelineEntry.astro";
+
+interface Props {
+  /** Entries from getCollection("timeline"). */
+  entries?: CollectionEntry<"timeline">[];
+  /** Heading level for each group subhead (keep the page's single <h1> elsewhere). */
+  headingLevel?: "h2" | "h3";
+  class?: string;
+}
+
+const { entries = [], headingLevel = "h2", class: className = "" } = Astro.props;
+
+// Display order + human labels for each `type`. Only non-empty groups render.
+const GROUPS = [
+  { type: "education", label: "Education" },
+  { type: "industry", label: "Industry & Internships" },
+  { type: "service", label: "Service & Teaching" },
+  { type: "award", label: "Awards" },
+] as const;
+
+// "2024" → 202400, "2024-06" → 202406 — a comparable key for descending sort.
+function startKey(start: string): number {
+  const [year, month] = start.split("-");
+  return Number(year) * 100 + (month ? Number(month) : 0);
+}
+
+const groups = GROUPS.map((group) => ({
+  ...group,
+  items: entries
+    .filter((entry) => entry.data.type === group.type)
+    .sort((a, b) => startKey(b.data.start) - startKey(a.data.start)),
+})).filter((group) => group.items.length > 0);
+
+const Heading = headingLevel;
+---
+
+<div class:list={["timeline", className]}>
+  {
+    groups.map((group) => (
+      <section class="timeline__group">
+        <Heading class="timeline__subhead">{group.label}</Heading>
+        <ul class="timeline__entries" role="list">
+          {group.items.map((entry) => (
+            <TimelineEntry entry={entry} />
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .timeline__group + .timeline__group {
+    margin-top: var(--space-16);
+  }
+
+  /* Mono group subhead — overrides the global serif heading styling. */
+  .timeline__subhead {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    color: var(--muted);
+    margin-bottom: var(--space-6);
+  }
+
+  .timeline__entries {
+    display: grid;
+    gap: var(--space-8);
+  }
+</style>

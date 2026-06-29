@@ -1,0 +1,56 @@
+---
+import { withBase, isExternal } from "../lib/url";
+
+interface Props {
+  href?: string;
+  variant?: "primary" | "ghost";
+  class?: string;
+  download?: boolean;
+  type?: "button" | "submit";
+}
+const { href, variant = "primary", class: className = "", download = false, type = "button" } = Astro.props;
+const ext = href ? isExternal(href) : false;
+const Tag = href ? "a" : "button";
+const hrefAttr = href ? (ext ? href : withBase(href)) : undefined;
+---
+
+<Tag
+  class={`btn btn--${variant} ${className}`}
+  href={hrefAttr}
+  target={ext ? "_blank" : undefined}
+  rel={ext ? "noopener noreferrer" : undefined}
+  download={download ? "" : undefined}
+  type={href ? undefined : type}
+>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    min-height: 44px;
+    padding: 0.7em 1.15em;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background var(--dur) var(--ease),
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .btn--primary { background: var(--accent); color: var(--surface); }
+  .btn--primary:hover,
+  .btn--primary:focus-visible { background: var(--accent-press); }
+  .btn--ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn--ghost:hover,
+  .btn--ghost:focus-visible { border-color: var(--accent); color: var(--accent); }
+  .btn:active { transform: translateY(1px); }
+</style>

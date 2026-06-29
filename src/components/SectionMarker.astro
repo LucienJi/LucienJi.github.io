@@ -1,0 +1,44 @@
+---
+interface Props {
+  number: string | number;
+  label: string;
+  id?: string;
+  class?: string;
+}
+const { number, label, id, class: className = "" } = Astro.props;
+const nn = String(number).padStart(2, "0");
+---
+
+<div class={`section-marker ${className}`} id={id}>
+  <span class="section-marker__no">§{nn}</span>
+  <span class="section-marker__label">{label}</span>
+  <span class="section-marker__rule" aria-hidden="true"></span>
+</div>
+
+<style>
+  .section-marker {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
+  }
+  .section-marker__no {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .section-marker__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .section-marker__rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+</style>

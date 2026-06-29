@@ -1,0 +1,169 @@
+---
+// Gallery — an aspect-respecting *justified* mosaic (Lightroom-style rows), the
+// calm alternative to a uniform tile grid (DESIGN.md §6.16 / §8.2). Every cell is
+// a <PhotoPlate> (a matted "hung print" that opens the shared Lightbox), so a
+// page needs only ONE <Lightbox /> for the whole gallery — the plates wire
+// themselves to it via their data-lightbox-trigger attributes.
+//
+// Layout: photos are packed at BUILD TIME into rows whose aspect-ratios sum to a
+// target, then each row uses `flex-grow: <aspect>` over a 0 basis so every plate
+// in a row shares one height while keeping its true proportions — the classic
+// justified-row look, fully static (no JS, no CLS). An under-filled final row is
+// left at a natural height instead of being stretched across the full width.
+//
+// Plate numbering: cells are labelled "Plate <roman> — <place>" in reading order,
+// continuing from `startPlate` (so a PhotoEssay can number plates continuously
+// across several blocks). EXIF marginalia is added by PhotoPlate itself.
+//
+// Self-contained at the wide measure — do NOT wrap in another .wrap-* container.
+//
+//   <Gallery photos={photoEntries} />
+//   <Gallery photos={cluster} startPlate={5} priority />  // continues "Plate V…"
+import type { CollectionEntry } from "astro:content";
+import PhotoPlate from "@components/PhotoPlate.astro";
+import { mustResolveImage } from "@lib/images";
+
+interface Props {
+  /** Photo collection ENTRIES (not `.data`). Rendered in the given order. */
+  photos: CollectionEntry<"photos">[];
+  /** 1-based plate number of the first photo (continuous numbering across blocks). */
+  startPlate?: number;
+  /** Eager-load the first plate when this gallery is the page's LCP. */
+  priority?: boolean;
+  /** Extra classes on the root. */
+  class?: string;
+}
+const {
+  photos = [],
+  startPlate = 1,
+  priority = false,
+  class: className = "",
+} = Astro.props;
+
+// --- Plate label grammar (a photo's place/year rhymes with a paper's venue/year)
+function toRoman(num: number): string {
+  if (!Number.isFinite(num) || num <= 0) return String(num);
+  const table: [number, string][] = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"],
+    [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"],
+    [5, "V"], [4, "IV"], [1, "I"],
+  ];
+  let n = Math.floor(num);
+  let out = "";
+  for (const [value, sym] of table) while (n >= value) { out += sym; n -= value; }
+  return out;
+}
+function plateLabel(data: CollectionEntry<"photos">["data"], n: number): string {
+  const place = [data.location, data.year].filter(Boolean).join(", ");
+  const tail = place || data.caption || "";
+  return tail ? `Plate ${toRoman(n)} — ${tail}` : `Plate ${toRoman(n)}`;
+}
+
+// --- True aspect ratio: frontmatter override → intrinsic file dimensions ------
+// Matches how PhotoPlate/ResponsiveImage compute their ratio, so flex heights
+// line up exactly within a row.
+const aspectOf = (entry: CollectionEntry<"photos">): number => {
+  if (entry.data.aspect && entry.data.aspect > 0) return entry.data.aspect;
+  const meta = mustResolveImage(entry.data.src);
+  return meta.width / meta.height;
+};
+
+// --- Justified row packing (build time) --------------------------------------
+// TARGET = the aspect-ratio sum a row aims for before wrapping; larger ⇒ more
+// images per row / shorter rows. A geometry constant (like FullBleedDivider's
+// band height), deliberately outside the spacing-token scale.
+const TARGET = 3.4;
+type Cell = { entry: CollectionEntry<"photos">; aspect: number; plate: number; first: boolean };
+type Row = { cells: Cell[]; reachedTarget: boolean };
+
+const rows: Row[] = [];
+let current: Cell[] = [];
+let sum = 0;
+photos.forEach((entry, i) => {
+  const aspect = aspectOf(entry);
+  current.push({ entry, aspect, plate: startPlate + i, first: i === 0 });
+  sum += aspect;
+  if (sum >= TARGET) {
+    rows.push({ cells: current, reachedTarget: true });
+    current = [];
+    sum = 0;
+  }
+});
+if (current.length) rows.push({ cells: current, reachedTarget: false });
+
+// Per-cell srcset hint: a justified cell spans roughly a third of the wide measure.
+const SIZES = "(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 100vw";
+---
+
+{
+  photos.length > 0 && (
+    <div class={`gal ${className}`.trim()}>
+      {rows.map((row) => (
+        <div class:list={["gal__row", { "gal__row--loose": !row.reachedTarget }]}>
+          {row.cells.map((cell) => (
+            <div class="gal__item" style={`--aspect:${cell.aspect.toFixed(4)}`}>
+              <PhotoPlate
+                photo={cell.entry.data}
+                plateLabel={plateLabel(cell.entry.data, cell.plate)}
+                priority={priority && cell.first}
+                sizes={SIZES}
+              />
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+<style>
+  /* Self-contained at the wide measure (matches TwoWaysOfSeeing's convention). */
+  .gal {
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+    padding-inline: var(--page-gutter);
+    /* Editorial row height used ONLY to size an under-filled final row — a
+       geometry constant, deliberately outside the spacing scale. */
+    --row-h: clamp(220px, 30vw, 360px);
+  }
+
+  /* Vertical rhythm between justified rows (captions get room to breathe). */
+  .gal__row + .gal__row {
+    margin-top: var(--space-8);
+  }
+
+  .gal__row {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  /* Justified cell: width ∝ aspect ⇒ every plate in the row shares one height. */
+  .gal__item {
+    flex-grow: var(--aspect);
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+  }
+
+  /* An under-filled final row keeps a natural height instead of stretching. */
+  .gal__row--loose .gal__item {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: calc(var(--row-h) * var(--aspect));
+    max-width: 100%;
+  }
+
+  /* Phones: one calm column (a 3-up justified row would shrink plates too far). */
+  @media (max-width: 640px) {
+    .gal__row {
+      flex-wrap: wrap;
+      gap: var(--space-8);
+    }
+    .gal__item,
+    .gal__row--loose .gal__item {
+      flex-basis: 100%;
+      width: auto;
+    }
+  }
+</style>

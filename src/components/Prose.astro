@@ -1,0 +1,10 @@
+---
+// Wrapper for long-form MDX/markdown bodies: 720px measure, serif prose,
+// link styling, optional cobalt drop cap. Wrap <Content /> renders in this.
+interface Props {
+  class?: string;
+  dropCap?: boolean;
+}
+const { class: className = "", dropCap = false } = Astro.props;
+---
+<div class={`prose ${dropCap ? "drop-cap" : ""} ${className}`}><slot /></div>

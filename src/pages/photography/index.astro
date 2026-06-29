@@ -1,0 +1,123 @@
+---
+// /photography — the Plates index (DESIGN.md §7.5 / §8).
+//
+// The artist side of the monograph, presented as a photo-book: every named
+// series is laid out as an editorial PHOTO-ESSAY (roman folio + title + intro +
+// an aspect-respecting sequence of full-bleed singles, diptychs and small
+// clusters) in the book's running `order`. The whole route is forced onto the
+// Nocturne "Plate" palette (forceTheme="dark") so prints glow on dark gallery
+// walls; the Masthead swaps its theme toggle for the "§ PLATES" label
+// automatically.
+//
+// A single <h1> ("Photography") supplies the page heading; each <PhotoEssay>
+// keeps its default <h2> series title, so the heading outline stays ordered.
+// Plates wire themselves to the ONE <Lightbox /> via their data-lightbox-trigger
+// attributes (emitted by PhotoPlate), so nothing here touches the lightbox.
+//
+// PhotoEssay exposes no "link the header" prop, so each essay is followed by a
+// base-correct permalink to its dedicated page (/photography/{series.id}),
+// aligned under the essay's reading column.
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import PhotoEssay from "@components/PhotoEssay.astro";
+import Lightbox from "@components/Lightbox.astro";
+import Eyebrow from "@components/Eyebrow.astro";
+import { withBase } from "@lib/url";
+
+// Series in the photo-book's running order (I, II, III …).
+const series = (await getCollection("series")).sort(
+  (a, b) => (a.data.order ?? 0) - (b.data.order ?? 0),
+);
+
+// Photos grouped per series by id, each group in its own `order`. Series with no
+// plates yet are skipped so the index never shows an empty header.
+const allPhotos = await getCollection("photos");
+const essays = series
+  .map((s) => ({
+    entry: s,
+    photos: allPhotos
+      .filter((p) => p.data.series === s.id)
+      .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0)),
+  }))
+  .filter((e) => e.photos.length > 0);
+
+// Honest, data-derived index meta — e.g. "3 series · 11 plates".
+const seriesCount = essays.length;
+const plateCount = essays.reduce((n, e) => n + e.photos.length, 0);
+const indexMeta =
+  seriesCount > 0
+    ? `${seriesCount} series · ${plateCount} plate${plateCount === 1 ? "" : "s"}`
+    : "";
+---
+
+<BaseLayout
+  title="Photography"
+  description="Photographs in series — a plate section of the monograph, shown as editorial photo-essays."
+  forceTheme="dark"
+>
+  <section class="ph-intro section wrap-wide">
+    <Eyebrow>§ Plates</Eyebrow>
+    <h1 class="ph-intro__title">Photography</h1>
+    <p class="ph-intro__lede lede">
+      Series presented as photo-essays — full-bleed singles, diptychs, and small
+      clusters, each frame a matted print.
+    </p>
+    {indexMeta && <p class="ph-intro__meta meta">{indexMeta}</p>}
+  </section>
+
+  {
+    essays.length > 0 ? (
+      essays.map(({ entry, photos }, i) => (
+        <section class="section">
+          <PhotoEssay series={entry.data} photos={photos} priority={i === 0} />
+
+          <div class="ph-essay__foot wrap-wide">
+            <div class="spread">
+              <p class="main">
+                <a
+                  class="link ph-essay__more"
+                  href={withBase(`/photography/${entry.id}`)}
+                >
+                  View the full {entry.data.title} series{" "}
+                  <span aria-hidden="true">→</span>
+                </a>
+              </p>
+            </div>
+          </div>
+        </section>
+      ))
+    ) : (
+      <p class="ph-empty section wrap-wide meta">
+        No plates yet — the first series is being prepared.
+      </p>
+    )
+  }
+
+  <Lightbox />
+</BaseLayout>
+
+<style>
+  /* Intro — the plate-section title page (shares the home hero's wide measure). */
+  .ph-intro__title {
+    margin-top: var(--space-3);
+  }
+  .ph-intro__lede {
+    margin-top: var(--space-4);
+    max-width: 52ch;
+  }
+  .ph-intro__meta {
+    margin-top: var(--space-6);
+  }
+
+  /* Per-essay permalink. The essay header uses the same wrap-wide > .spread
+     structure, so placing the link in .main aligns it under the essay's title
+     column on desktop and runs full-width once .spread collapses below 1024px. */
+  .ph-essay__foot {
+    margin-top: var(--space-8);
+  }
+  .ph-essay__more {
+    font-family: var(--font-mono);
+    font-size: var(--fs-ui);
+    letter-spacing: 0.04em;
+  }
+</style>

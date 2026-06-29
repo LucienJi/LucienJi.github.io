@@ -1,0 +1,311 @@
+---
+/**
+ * Hero — the home "Title Page" (DESIGN.md §7.1).
+ *
+ * Left column: mono cobalt Eyebrow, the page <h1> (name in display serif 500),
+ * the one warm serif "thesis" line, NowStatus, the dual CTAs
+ * (Read the research → / See the photographs →) and a mono contact row
+ * (ContactBlock).
+ *
+ * Right (desktop) / below (mobile): ONE matted hero plate (priority / LCP) that
+ * cross-fades through up to the first 3 of `photos` every ~6s with a mono caption
+ * `Fig. 01 — {location}, {year}`. The crossfade is a small island: it inits on
+ * `astro:page-load`, is idempotent, and is FROZEN under `prefers-reduced-motion`.
+ * No overlays are ever drawn on the photograph.
+ *
+ *   <Hero photos={selectedPhotoEntries} />   // photos: CollectionEntry<"photos">[]
+ *
+ * `photos` may be empty → the plate is hidden gracefully and the hero collapses
+ * to a calm single column.
+ */
+import type { CollectionEntry } from "astro:content";
+import { site } from "@data/site";
+import Eyebrow from "@components/Eyebrow.astro";
+import NowStatus from "@components/NowStatus.astro";
+import CTAButton from "@components/CTAButton.astro";
+import ContactBlock from "@components/ContactBlock.astro";
+import ResponsiveImage from "@components/ResponsiveImage.astro";
+
+interface Props {
+  /** Selected photo entries; the plate cross-fades through up to the first 3. May be empty. */
+  photos: CollectionEntry<"photos">[];
+}
+const { photos = [] } = Astro.props;
+
+// The hero plate rotates through at most three plates (DESIGN.md §7.1 / §9).
+const plates = photos.slice(0, 3);
+const hasPlate = plates.length > 0;
+
+// Fixed plate label — the hero is the monograph's first figure; the place/year
+// always follow whichever plate is currently shown.
+const PLATE_LABEL = "Fig. 01";
+// One shared frame aspect so the matted keyline never shifts as photos cross-fade.
+const FRAME_ASPECT = 4 / 3;
+// Plate slot: ~one wide-column half on desktop, full width on mobile.
+const PLATE_SIZES = "(min-width: 1024px) 500px, 100vw";
+
+function plateCaption(entry: CollectionEntry<"photos">): string {
+  const { location, year, caption } = entry.data;
+  const place = [location, year].filter(Boolean).join(", ");
+  if (place) return `${PLATE_LABEL} — ${place}`;
+  if (caption) return `${PLATE_LABEL} — ${caption}`;
+  return PLATE_LABEL;
+}
+---
+
+<section class:list={["hero", { "hero--solo": !hasPlate }]}>
+  <div class="hero__inner">
+    <div class="hero__text">
+      <Eyebrow>§ {site.field} — {site.role}, {site.university}</Eyebrow>
+
+      <h1 class="hero__name">{site.name}</h1>
+
+      <p class="hero__tagline">{site.tagline}</p>
+
+      <NowStatus class="hero__now" />
+
+      <div class="hero__actions">
+        <CTAButton href="/research" variant="primary">
+          Read the research <span aria-hidden="true">→</span>
+        </CTAButton>
+        <CTAButton href="/photography" variant="ghost">
+          See the photographs <span aria-hidden="true">→</span>
+        </CTAButton>
+      </div>
+
+      <ContactBlock class="hero__contact" />
+    </div>
+
+    {
+      hasPlate && (
+        <figure class="hero__plate" data-hero-plate>
+          <div class="hero__stack">
+            {plates.map((entry, i) => (
+              <div
+                class="hero__layer"
+                data-hero-layer
+                data-caption={plateCaption(entry)}
+                data-active={i === 0 ? "" : undefined}
+                aria-hidden={i === 0 ? undefined : "true"}
+              >
+                <ResponsiveImage
+                  src={entry.data.src}
+                  alt={entry.data.alt}
+                  mat
+                  priority={i === 0}
+                  aspect={FRAME_ASPECT}
+                  sizes={PLATE_SIZES}
+                />
+              </div>
+            ))}
+          </div>
+          <figcaption class="hero__caption" data-hero-caption>{plateCaption(plates[0])}</figcaption>
+        </figure>
+      )
+    }
+  </div>
+</section>
+
+<script>
+  // Hero plate crossfade island. Cycles `data-active` across the stacked plate
+  // layers every ~6s, updating the mono caption to match. Module-scoped state +
+  // single listeners keep it idempotent across view transitions; it never starts
+  // the timer under prefers-reduced-motion (FROZEN on the first plate).
+  const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const INTERVAL_MS = 6000;
+
+  let layers: HTMLElement[] = [];
+  let captionEl: HTMLElement | null = null;
+  let index = 0;
+  let timer: number | undefined;
+
+  function stop() {
+    if (timer !== undefined) {
+      clearInterval(timer);
+      timer = undefined;
+    }
+  }
+
+  function show(target: number) {
+    if (layers.length === 0) return;
+    const next = ((target % layers.length) + layers.length) % layers.length;
+    const current = layers[index];
+    if (current) {
+      current.removeAttribute("data-active");
+      current.setAttribute("aria-hidden", "true");
+    }
+    index = next;
+    const el = layers[index];
+    if (el) {
+      el.setAttribute("data-active", "");
+      el.removeAttribute("aria-hidden");
+      if (captionEl && el.dataset.caption) captionEl.textContent = el.dataset.caption;
+    }
+  }
+
+  function play() {
+    stop();
+    // Frozen under reduced motion; nothing to cross-fade with < 2 plates.
+    if (REDUCE.matches || layers.length < 2) return;
+    timer = window.setInterval(() => show(index + 1), INTERVAL_MS);
+  }
+
+  function initHero() {
+    const root = document.querySelector<HTMLElement>("[data-hero-plate]");
+    if (!root) {
+      stop();
+      layers = [];
+      captionEl = null;
+      return;
+    }
+    // Idempotency guard: a re-fired page-load on the same node just (re)plays.
+    if (root.dataset.heroReady === "1") {
+      play();
+      return;
+    }
+    root.dataset.heroReady = "1";
+
+    stop();
+    layers = Array.from(root.querySelectorAll<HTMLElement>("[data-hero-layer]"));
+    captionEl = root.querySelector<HTMLElement>("[data-hero-caption]");
+    index = 0;
+
+    // Baseline = only the first plate shown (matches server render). This is also
+    // the FROZEN state honored under reduced motion.
+    layers.forEach((el, i) => {
+      if (i === 0) {
+        el.setAttribute("data-active", "");
+        el.removeAttribute("aria-hidden");
+      } else {
+        el.removeAttribute("data-active");
+        el.setAttribute("aria-hidden", "true");
+      }
+    });
+    const first = layers[0];
+    if (captionEl && first?.dataset.caption) captionEl.textContent = first.dataset.caption;
+
+    play();
+  }
+
+  document.addEventListener("astro:page-load", initHero);
+  // Tear the timer down before a view transition swaps the DOM out.
+  document.addEventListener("astro:before-swap", stop);
+  // Re-evaluate when the user's motion preference changes at runtime.
+  REDUCE.addEventListener("change", play);
+</script>
+
+<style>
+  .hero {
+    padding-block: var(--section-rhythm);
+  }
+
+  .hero__inner {
+    max-width: var(--measure-wide);
+    margin-inline: auto;
+    padding-inline: var(--page-gutter);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: var(--space-16);
+    }
+    /* No plate → don't reserve a second column; keep the hero calm. */
+    .hero--solo .hero__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* With no plate, hold the lone text column to a comfortable reading measure. */
+  .hero--solo .hero__text {
+    max-width: var(--measure-read);
+  }
+
+  /* ---------- Left: editorial text column ---------- */
+  .hero__text {
+    min-width: 0;
+  }
+
+  .hero__name {
+    margin-top: var(--space-3);
+    font-size: var(--fs-display);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* The one warm, human "thesis" line — serif, sized to fall to ~2 lines. */
+  .hero__tagline {
+    margin-top: var(--space-6);
+    max-width: 46ch; /* typographic measure: keeps the thesis to ~2 lines */
+    font-family: var(--font-serif);
+    font-size: var(--fs-lede);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .hero__now {
+    margin-top: var(--space-6);
+  }
+
+  .hero__actions {
+    margin-top: var(--space-8);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .hero__contact {
+    margin-top: var(--space-8);
+  }
+
+  /* ---------- Right: ONE matted hero plate, cross-fading up to 3 photos ---------- */
+  .hero__plate {
+    margin: 0;
+    min-width: 0;
+  }
+
+  /* The first layer stays in normal flow and defines the plate's size (zero CLS);
+     the remaining layers stack exactly on top of it and cross-fade by opacity. */
+  .hero__stack {
+    position: relative;
+  }
+
+  .hero__layer {
+    margin: 0;
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease);
+  }
+  .hero__layer[data-active] {
+    opacity: 1;
+  }
+  .hero__layer + .hero__layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Mono caption below the plate (never an overlay on the image). */
+  .hero__caption {
+    margin-top: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    color: var(--faint);
+  }
+
+  /* Freeze the crossfade for reduced-motion users (the island also never starts
+     the timer; this removes the opacity tween even if state ever changes). */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__layer {
+      transition: none;
+    }
+  }
+</style>

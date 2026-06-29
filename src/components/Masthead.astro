@@ -1,0 +1,120 @@
+---
+import { site } from "../data/site";
+import { withBase, isActive } from "../lib/url";
+import ThemeToggle from "./ThemeToggle.astro";
+
+interface Props {
+  /** On forced-dark gallery routes, the toggle is replaced by a static label. */
+  plateMode?: boolean;
+}
+const { plateMode = false } = Astro.props;
+const path = Astro.url.pathname;
+const items = site.nav;
+---
+
+<header class="masthead">
+  <div class="masthead__inner wrap-wide">
+    <a class="wordmark" href={withBase("/")}>{site.shortName}</a>
+    <nav class="nav" aria-label="Primary">
+      <ul class="nav__list" role="list">
+        {
+          items.map((item) => (
+            <li>
+              <a
+                class="nav__link"
+                href={withBase(item.href)}
+                aria-current={isActive(item.href, path) ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      {
+        plateMode ? (
+          <span class="plate-label">§ PLATES — GALLERY DARK</span>
+        ) : (
+          <ThemeToggle />
+        )
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .masthead {
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .masthead__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--fs-meta);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+  }
+  .nav__list {
+    display: flex;
+    gap: var(--space-6);
+    padding: 0;
+  }
+  .nav__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+  }
+  .nav__link:hover { color: var(--ink); }
+  .nav__link[aria-current="page"] { color: var(--ink); }
+  .nav__link[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .plate-label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-eyebrow);
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    white-space: nowrap;
+  }
+  @media (max-width: 620px) {
+    .masthead__inner { flex-wrap: wrap; }
+    .nav {
+      flex-basis: 100%;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+    .nav__list { flex-wrap: wrap; gap: var(--space-4); }
+    .wordmark { font-size: var(--fs-eyebrow); }
+  }
+</style>

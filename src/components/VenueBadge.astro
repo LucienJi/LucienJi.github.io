@@ -1,0 +1,87 @@
+---
+/**
+ * VenueBadge — a mono publication chip, e.g. `CoRL 2025`.
+ *
+ * Composes design tokens only; never modifies the foundation.
+ * - Visible content is `venue` + optional `year` (the "CoRL 2025" chip).
+ * - `type` enriches the screen-reader announcement (e.g. "…, workshop paper")
+ *   and is mirrored to `data-type` as a downstream styling/filter hook.
+ * - `award`, when present, renders as a small cobalt sub-tag.
+ */
+type PubType = "conference" | "journal" | "workshop" | "preprint" | "thesis";
+
+interface Props {
+  venue: string;
+  year?: number;
+  type?: PubType;
+  award?: string;
+  class?: string;
+}
+
+const { venue, year, type, award, class: className = "" } = Astro.props;
+
+// Natural-language nouns so the badge announces the publication kind cleanly.
+const typeNoun: Record<PubType, string> = {
+  conference: "conference paper",
+  journal: "journal article",
+  workshop: "workshop paper",
+  preprint: "preprint",
+  thesis: "thesis",
+};
+
+const venueText = year ? `${venue} ${year}` : venue;
+---
+
+<span class={`venue ${className}`}>
+  <span class="venue__chip" data-type={type}>
+    {venueText}
+    {type && <span class="u-visually-hidden">, {typeNoun[type]}</span>}
+  </span>
+  {
+    award && (
+      <span class="venue__award">
+        <span class="u-visually-hidden">Award — </span>
+        {award}
+      </span>
+    )
+  }
+</span>
+
+<style>
+  .venue {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* Neutral mono chip — never spends the cobalt accent (reserved for the award). */
+  .venue__chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    white-space: nowrap;
+  }
+
+  /* Award sub-tag — the one accented element: cobalt on --accent-soft. */
+  .venue__award {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: var(--radius);
+  }
+</style>

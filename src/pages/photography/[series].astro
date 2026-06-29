@@ -1,0 +1,148 @@
+---
+// /photography/[series] — a single photo series as an immersive photo-essay
+// (DESIGN.md §7.6). Forced into the dark "Plate" palette so prints glow, read
+// like a printed portfolio: a full-bleed cover plate (frontispiece), then the
+// series essay — header + an aspect-respecting sequence of singles, diptychs and
+// clusters — with every plate opening the page's single <Lightbox>.
+//
+// One page = one series. getStaticPaths emits a route per series entry, keyed by
+// the entry id (params.series), and hands each page its photos (filtered by
+// `series` and ordered). <PhotoEssay titleAs="h1"> supplies the page's sole <h1>.
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import PhotoEssay from "@components/PhotoEssay.astro";
+import Lightbox from "@components/Lightbox.astro";
+import ResponsiveImage from "@components/ResponsiveImage.astro";
+import { resolveImage } from "@lib/images";
+import { withBase } from "@lib/url";
+
+export async function getStaticPaths() {
+  const [allSeries, allPhotos] = await Promise.all([
+    getCollection("series"),
+    getCollection("photos"),
+  ]);
+
+  return allSeries.flatMap((entry) => {
+    // This series' photos, in reading order. PhotoEssay re-sorts internally, but
+    // the page also needs the ordered list to choose a hero fallback below.
+    const photos = allPhotos
+      .filter((photo) => photo.data.series === entry.id)
+      .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+
+    // Mirror photography/index.astro: a series with no plates yet gets no route,
+    // so an in-prep series never builds a hollow, sitemap-listed page that is
+    // unreachable from the index.
+    if (photos.length === 0) return [];
+
+    return [
+      {
+        params: { series: entry.id }, // the entry id IS the slug
+        props: { series: entry, photos },
+      },
+    ];
+  });
+}
+
+const { series, photos } = Astro.props as {
+  series: CollectionEntry<"series">;
+  photos: CollectionEntry<"photos">[];
+};
+
+// Hero ("frontispiece") plate: the series cover, falling back to the first photo
+// when a cover image can't be resolved. Borrow the matching photo's alt so the
+// cover is described honestly; only synthesize one when no photo matches.
+const firstPhoto = photos[0];
+const heroSrc = resolveImage(series.data.cover)
+  ? series.data.cover
+  : firstPhoto?.data.src;
+const heroMatch = heroSrc
+  ? photos.find((photo) => photo.data.src === heroSrc)
+  : undefined;
+const heroAlt =
+  heroMatch?.data.alt ?? `Cover plate for the “${series.data.title}” series.`;
+---
+
+<BaseLayout
+  title={series.data.title}
+  description={series.data.intro}
+  forceTheme="dark"
+>
+  {
+    heroSrc && (
+      <div class="series-hero full-bleed">
+        <ResponsiveImage src={heroSrc} alt={heroAlt} sizes="100vw" priority />
+      </div>
+    )
+  }
+
+  <div class="series-body">
+    <PhotoEssay
+      series={series.data}
+      photos={photos}
+      titleAs="h1"
+      priority={!heroSrc}
+    />
+  </div>
+
+  <nav class="series-foot wrap-wide" aria-label="Photography section">
+    <a class="series-foot__link link" href={withBase("/photography")}>
+      <span class="series-foot__arrow" aria-hidden="true">←</span>
+      All plates
+    </a>
+  </nav>
+
+  <Lightbox />
+</BaseLayout>
+
+<style>
+  /* Frontispiece: a clean, immersive cover plate that bleeds edge-to-edge under
+     the masthead. No mat, no overlay — the print is shown clean (DESIGN §8.3). */
+  .series-hero :global(.rimg__img) {
+    border-radius: 0;
+    width: 100%;
+    /* 88vh is a geometry cap for the immersive cover, not a spacing token. */
+    max-height: 88vh;
+    object-fit: cover;
+  }
+
+  /* Drop the essay's title block a full section-rhythm below the cover so the
+     "frontispiece → title page → plates" reading beat lands. */
+  .series-body {
+    padding-top: var(--section-rhythm);
+  }
+
+  /* End-of-essay wayfinding back to the plates index. */
+  .series-foot {
+    margin-top: var(--section-rhythm);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-16);
+    border-top: 1px solid var(--line);
+  }
+  .series-foot__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-block: var(--space-1); /* keeps a ≥24px hit area for the mono link */
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  /* The arrow nudges back on hover/focus (keyboard-equal); a static 2px shift,
+     not a spacing token. */
+  .series-foot__arrow {
+    display: inline-block;
+    transition: transform var(--dur) var(--ease);
+  }
+  .series-foot__link:hover .series-foot__arrow,
+  .series-foot__link:focus-visible .series-foot__arrow {
+    transform: translateX(-2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .series-foot__arrow {
+      transition: none;
+    }
+  }
+</style>

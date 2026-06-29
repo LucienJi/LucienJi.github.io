@@ -1,0 +1,20 @@
+title: "Stable Offline Reinforcement Learning for Real-World Robots"
+authors:
+  - "Your Name"
+  - "C. Coauthor"
+  - "S. Advisor"
+venue: "NeurIPS"
+year: 2024
+type: "conference"
+links:
+  pdf: "#"
+  arxiv: "https://arxiv.org/abs/0000.00000"
+  code: "https://github.com/yourhandle/offline-rl"
+  bibtex: "@inproceedings{yourname2024offline,\n  title={Stable Offline Reinforcement Learning for Real-World Robots},\n  author={Name, Your and Advisor, S.},\n  booktitle={NeurIPS},\n  year={2024}\n}"
+oneLiner: "Turns logged interaction data into reliable control without unsafe exploration."
+tags:
+  - "reinforcement-learning"
+  - "offline-rl"
+  - "robot-learning"
+teaser: "fig-rl.jpg"
+selected: true

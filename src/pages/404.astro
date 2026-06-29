@@ -1,0 +1,32 @@
+---
+/**
+ * 404 — Page not found (DESIGN.md §7.9).
+ * Minimal and on-brand: a mono "§ 404 — PAGE NOT FOUND" kicker, one calm
+ * serif line, and a single cobalt-underline link back to the home page.
+ * No gimmicks. One <h1>.
+ */
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Eyebrow from "@components/Eyebrow.astro";
+import { withBase } from "@lib/url";
+---
+
+<BaseLayout title="404" description="Page not found.">
+  <section class="section wrap-read not-found">
+    <Eyebrow>§ 404 — Page not found</Eyebrow>
+    <h1 class="not-found__line">The page you’re looking for could not be found.</h1>
+    <p class="meta not-found__back">
+      <a class="link" href={withBase("/")}>Return home →</a>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Spacing only — type voices come from .eyebrow / h1 / .meta / .link. */
+  .not-found__line {
+    margin-top: var(--space-4);
+    max-width: 24ch; /* headings may run wider than prose (DESIGN.md §3.3) */
+  }
+  .not-found__back {
+    margin-top: var(--space-8);
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+import { site } from "../data/site";
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+const { now } = site;
+---
+
+{
+  now && (
+    <p class={`now ${className}`}>
+      <span class="now__dot" aria-hidden="true" />
+      <span class="now__kicker">NOW</span>
+      <span class="now__text">{now}</span>
+    </p>
+  )
+}
+
+<style>
+  .now {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.03em;
+  }
+  .now__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    flex: none;
+  }
+  .now__kicker { color: var(--accent); letter-spacing: 0.1em; }
+  .now__text { color: var(--muted); }
+  @media (prefers-reduced-motion: no-preference) {
+    .now__dot { animation: now-pulse 2.6s var(--ease) infinite; }
+  }
+  @keyframes now-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+</style>

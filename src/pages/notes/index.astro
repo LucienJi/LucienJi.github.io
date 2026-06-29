@@ -1,0 +1,147 @@
+---
+/**
+ * /notes — Notes index (DESIGN.md §7.8).
+ *
+ * A reverse-chronological list of writing: a mono date kicker + serif title +
+ * summary, set in the calm 720px reading column. Drafts are skipped; when there
+ * is nothing to show, a single calm line stands in.
+ *
+ * NOTE: The section is feature-flagged via `site.features.notes`, which only
+ * governs whether Notes is LINKED from the masthead nav. The pages are built
+ * unconditionally so deep links keep working — hence no flag gate here.
+ */
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Eyebrow from "@components/Eyebrow.astro";
+import { withBase } from "@lib/url";
+import { site } from "@data/site";
+
+const notes = (await getCollection("notes", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+// Mono date grammar. Format in UTC so a "2026-01-15" frontmatter date never
+// drifts a day across timezones; keep an ISO value on the <time> element.
+const formatDate = (d: Date): string =>
+  d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+const isoDate = (d: Date): string => d.toISOString().slice(0, 10);
+---
+
+<BaseLayout
+  title="Notes"
+  description={`Reading notes, project logs, and talk summaries by ${site.name}.`}
+>
+  <section class="section wrap-read">
+    <header class="notes-head">
+      <Eyebrow>§ NOTES</Eyebrow>
+      <h1 class="notes-head__title">Notes</h1>
+      {
+        notes.length > 0 && (
+          <p class="lede notes-head__lede">
+            Reading notes, project logs, and talk summaries — written in the
+            margins of the research.
+          </p>
+        )
+      }
+    </header>
+
+    {
+      notes.length > 0 ? (
+        <ol class="notes-list" role="list">
+          {notes.map((note) => (
+            <li class="note">
+              <p class="note__date">
+                <time datetime={isoDate(note.data.date)}>
+                  {formatDate(note.data.date)}
+                </time>
+              </p>
+              <h2 class="note__title">
+                <a class="note__link" href={withBase(`/notes/${note.id}`)}>
+                  {note.data.title}
+                </a>
+              </h2>
+              {note.data.summary && (
+                <p class="note__summary">{note.data.summary}</p>
+              )}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="notes-empty">
+          No notes published yet — new writing will appear here soon.
+        </p>
+      )
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .notes-head {
+    margin-bottom: var(--space-12);
+  }
+  .notes-head__title {
+    margin-top: var(--space-3);
+  }
+  .notes-head__lede {
+    margin-top: var(--space-4);
+    max-width: 52ch;
+  }
+
+  /* A ruled ledger of entries — a hairline above the list and below each row. */
+  .notes-list {
+    border-top: 1px solid var(--line);
+  }
+  .note {
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Mono date kicker (the marginalia voice, stacked above the title). */
+  .note__date {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    color: var(--faint);
+  }
+
+  /* Serif title — the row's voice. */
+  .note__title {
+    margin-top: var(--space-2);
+    font-size: var(--fs-h3);
+    font-weight: 600;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  .note__link {
+    color: var(--ink);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+  }
+  /* :focus-visible parity with :hover; underline is the non-color cue. */
+  .note__link:hover,
+  .note__link:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  .note__summary {
+    margin-top: var(--space-2);
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  /* Calm, single-line empty state. */
+  .notes-empty {
+    color: var(--muted);
+    font-style: italic;
+  }
+</style>

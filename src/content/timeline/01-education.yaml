@@ -1,0 +1,9 @@
+role: "Ph.D. in Robotics"
+org: "Your University"
+location: "City, State"
+start: "2022"
+type: "education"
+summary: "Robot learning and machine learning. Advised by Prof. Advisor Name."
+tags:
+  - "robot-learning"
+  - "ml"

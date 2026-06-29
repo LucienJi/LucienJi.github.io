@@ -1,0 +1,255 @@
+---
+/**
+ * Home — the monograph's "Title Page" (DESIGN.md §7.1).
+ *
+ * A 60-second orientation that auto-curates from `selected: true` content + the
+ * central site config, then routes to depth. Reading order is research-led; the
+ * page "breathes" from the editorial wide measure into full-bleed photography
+ * and back, exactly once each, to keep the home calm and uncluttered.
+ *
+ * Sequence:
+ *   Hero  →  §01 Selected Research  →  "Two ways of seeing" bridge  →
+ *   one full-bleed divider  →  §02 Selected Photographs (scroll-snap strip)  →
+ *   §03 About  →  (Colophon, from BaseLayout)
+ *
+ * Curation is entirely data-driven: add a paper (one YAML entry, `selected: true`)
+ * or a photo (drop a file + `selected: true`) and the home refreshes with no
+ * bespoke edits. Each major section carries a visually-hidden <h2> so the heading
+ * order stays h1 → h2 → h3 while the visible <SectionMarker> does the styling.
+ */
+import { getCollection } from "astro:content";
+
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Hero from "@components/Hero.astro";
+import SectionMarker from "@components/SectionMarker.astro";
+import PaperCard from "@components/PaperCard.astro";
+import TwoWaysOfSeeing from "@components/TwoWaysOfSeeing.astro";
+import FullBleedDivider from "@components/FullBleedDivider.astro";
+import PhotoPlate from "@components/PhotoPlate.astro";
+import ContactBlock from "@components/ContactBlock.astro";
+import Lightbox from "@components/Lightbox.astro";
+import Toast from "@components/Toast.astro";
+
+import { site } from "@data/site";
+import { withBase } from "@lib/url";
+
+// Selected publications — newest first; capped to keep the home calm (DESIGN: 3–4).
+const selectedPublications = (await getCollection("publications"))
+  .filter((p) => p.data.selected)
+  .sort((a, b) => b.data.year - a.data.year || b.id.localeCompare(a.id))
+  .slice(0, 4);
+
+// Selected photographs — ascending by `order` (stable id tiebreak for determinism
+// since several series share order values). The Hero cross-fades the first three.
+const selectedPhotos = (await getCollection("photos"))
+  .filter((p) => p.data.selected)
+  .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
+
+// About teaser — the first paragraph of the About note, so there is ONE source of
+// truth for the bio (collapses wrapped newlines; falls back to the SEO blurb).
+const aboutEntry = (await getCollection("about"))[0];
+const aboutTeaser =
+  aboutEntry?.body?.split(/\n\s*\n/)[0]?.replace(/\s+/g, " ").trim() ||
+  site.description;
+
+// The curated home strip cover-crops every plate to ONE landscape aspect so the
+// scroll-snap row reads as a calm, even band (the photos vary 1:1 … 16:9). The
+// uncropped frame is always one click away in the Lightbox.
+const STRIP_ASPECT = 3 / 2;
+const STRIP_SIZES = "(min-width: 768px) 420px, 78vw";
+---
+
+<BaseLayout>
+  <Hero photos={selectedPhotos} />
+
+  {
+    selectedPublications.length > 0 && (
+      <section id="research" class="section" aria-labelledby="home-research">
+        <div class="wrap-wide">
+          <h2 id="home-research" class="u-visually-hidden">Selected Research</h2>
+          <SectionMarker number={1} label="Selected Research" />
+
+          <ul class="papers" role="list">
+            {selectedPublications.map((entry) => (
+              <li>
+                <PaperCard entry={entry} />
+              </li>
+            ))}
+          </ul>
+
+          <p class="more">
+            <a class="morelink" href={withBase("/research")}>
+              All publications <span aria-hidden="true">→</span>
+            </a>
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  <div class="section bridge">
+    <TwoWaysOfSeeing
+      figure="fig-rl.jpg"
+      figureAlt="A reinforcement-learning policy rollout."
+      figureCaption="Fig. 04 — Policy rollout"
+      photo="nl-01.jpg"
+      photoAlt="Green aurora over a dark mountain ridge."
+      photoCaption="Plate I — Tromsø, 2024"
+      line="Two ways of seeing the same world — the same close attention to how it actually behaves."
+    />
+  </div>
+
+  <FullBleedDivider
+    src="cm-01.jpg"
+    alt="A wide city crossing at dusk."
+    caption="Tokyo, 2023"
+  />
+
+  {
+    selectedPhotos.length > 0 && (
+      <section id="photography" class="section" aria-labelledby="home-photography">
+        <div class="wrap-wide">
+          <h2 id="home-photography" class="u-visually-hidden">
+            Selected Photographs
+          </h2>
+          <SectionMarker number={2} label="Selected Photographs" />
+        </div>
+
+        <div class="strip full-bleed">
+          <ul class="strip__track" role="list">
+            {selectedPhotos.map((entry) => (
+              <li class="strip__item">
+                <PhotoPlate
+                  photo={{ ...entry.data, exif: undefined, aspect: STRIP_ASPECT }}
+                  sizes={STRIP_SIZES}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="wrap-wide">
+          <p class="more">
+            <a class="morelink" href={withBase("/photography")}>
+              View all photographs <span aria-hidden="true">→</span>
+            </a>
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  <section id="about" class="section" aria-labelledby="home-about">
+    <div class="wrap-read">
+      <h2 id="home-about" class="u-visually-hidden">About</h2>
+      <SectionMarker number={3} label="About" />
+
+      <p class="lede about__teaser">{aboutTeaser}</p>
+
+      <div class="about__contact">
+        <ContactBlock />
+      </div>
+
+      <p class="more">
+        <a class="morelink" href={withBase("/about")}>
+          Read more about me <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <Lightbox />
+  <Toast />
+</BaseLayout>
+
+<style>
+  /* ---------- §01 — Selected Research ---------- */
+  /* Editorial card grid: one column on mobile, two on wider screens. Cards fill
+     the row height so a two-up row reads as an even pair, not a ragged step. */
+  .papers {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .papers {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8);
+    }
+  }
+  .papers > li {
+    min-width: 0;
+  }
+  .papers > li > :global(.card) {
+    height: 100%;
+  }
+
+  /* ---------- Bridge "Two ways of seeing" ---------- */
+  /* TwoWaysOfSeeing owns its own wide measure + gutter; this wrapper only carries
+     the section's vertical rhythm. */
+  .bridge {
+    /* spacing only — width handled inside the component */
+  }
+
+  /* ---------- §02 — Selected Photographs (full-bleed scroll-snap strip) ---------- */
+  .strip {
+    margin-top: var(--space-2);
+  }
+  /* Horizontal, edge-to-edge, snap-per-plate. The inline padding lines the first
+     plate up with the page gutter and lets the last one rest off the right edge;
+     the block padding leaves room for each plate's 2px hover lift + soft shadow
+     (overflow-x:auto computes overflow-y to auto, which would otherwise clip it). */
+  .strip__track {
+    display: flex;
+    gap: var(--space-6);
+    align-items: start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--page-gutter);
+    padding-inline: var(--page-gutter);
+    padding-block: var(--space-6);
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .strip__item {
+    flex: 0 0 auto;
+    /* peek of the next plate at every width: ~1.2 up on mobile, ~3 across on wide */
+    width: clamp(260px, 78vw, 420px);
+    scroll-snap-align: start;
+  }
+
+  /* ---------- §03 — About ---------- */
+  .about__teaser {
+    max-width: var(--measure-read);
+    color: var(--ink); /* the one warm, human paragraph on the page */
+  }
+  .about__contact {
+    margin-top: var(--space-8);
+  }
+
+  /* ---------- Section "more" links (mono, cobalt underline draws on hover/focus) ---------- */
+  .more {
+    margin-top: var(--space-8);
+  }
+  .morelink {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    padding-bottom: 2px;
+    transition:
+      background-size var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .morelink:hover,
+  .morelink:focus-visible {
+    color: var(--accent-press);
+    background-size: 100% 1px;
+  }
+</style>

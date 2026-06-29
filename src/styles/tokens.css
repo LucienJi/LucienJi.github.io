@@ -1,0 +1,92 @@
+/* ==========================================================================
+   Monograph — Design Tokens
+   Single source of truth for color, type, space, motion. See DESIGN.md §2–§5.
+   Light = "Paper" (default, respects prefers-color-scheme).
+   Dark  = "Nocturne" — also the forced "Plate" palette for /photography.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* --- Color: Paper (light) --- */
+  --paper: #fbfbf9;       /* page background — warm near-white book stock */
+  --surface: #ffffff;     /* raised cards / image mats */
+  --ink: #1a1a17;         /* primary text — warm near-black (~15:1) */
+  --muted: #57564f;       /* secondary text (~7:1) */
+  --faint: #737067;       /* captions, metadata (~4.8:1) */
+  --line: #e6e5de;        /* 1px hairlines, rules, image frames */
+  --accent: #2e4fd4;      /* Cobalt — links, focus, eyebrows (~6:1) */
+  --accent-press: #2038b0;/* hover / active */
+  --accent-soft: #eaeefc; /* accent tint backgrounds / active nav */
+  --mat: #ffffff;         /* pure-white photo mat (fidelity over warm paper) */
+  --focus: #2e4fd4;       /* focus ring */
+  --shadow-card: 0 1px 2px rgba(20, 20, 18, 0.04), 0 6px 20px rgba(20, 20, 18, 0.06);
+
+  /* --- Shared (theme-independent) --- */
+  --lightbox-backdrop: rgba(10, 10, 9, 0.97);
+  --radius: 2px;
+
+  /* --- Type families --- */
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* --- Type scale (fluid, mobile-first; root 16px, body 18px) --- */
+  --fs-display: clamp(2.5rem, 6vw, 4.5rem);
+  --fs-h1: clamp(2rem, 4vw, 3rem);
+  --fs-h2: clamp(1.5rem, 2.5vw, 2rem);
+  --fs-h3: 1.25rem;
+  --fs-lede: 1.25rem;
+  --fs-body: 1.125rem;
+  --fs-ui: 1rem;
+  --fs-caption: 0.9375rem;
+  --fs-meta: 0.8125rem;
+  --fs-eyebrow: 0.75rem;
+  --fs-small: 0.875rem;
+
+  /* --- Spacing (8px base, 4px half-step) --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  --section-rhythm: clamp(64px, 10vw, 128px);
+  --card-pad: 24px;
+
+  /* --- Containers --- */
+  --measure-read: 720px;  /* prose: ~65–72ch */
+  --measure-wide: 1140px; /* overview, lists, CV, gallery index */
+  --page-gutter: var(--space-6);
+
+  /* --- Motion --- */
+  --ease: cubic-bezier(0.2, 0.65, 0.3, 0.9);
+  --dur: 200ms;
+  --dur-slow: 420ms;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* --- Color: Nocturne (dark) — also the gallery "Plate" palette --- */
+  --paper: #141413;       /* warm charcoal (deliberately not pure black) */
+  --surface: #1d1d1b;
+  --ink: #eceae2;         /* warm off-white (~14:1) */
+  --muted: #a4a299;
+  --faint: #83817a;
+  --line: #2c2c28;
+  --accent: #93a8ff;      /* Cobalt (dark) (~7:1) */
+  --accent-press: #b7c4ff;
+  --accent-soft: #1b2340;
+  --mat: #0e0e0d;         /* near-black mat so prints glow */
+  --focus: #93a8ff;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 600px) {
+  :root { --card-pad: 16px; }
+}

@@ -1,0 +1,98 @@
+---
+// CopyBibTeX — copies a BibTeX entry to the clipboard, then confirms via Toast.
+// Renders as an inline mono link so it sits naturally in a paper's link row
+// (PDF · arXiv · Code · Project · BibTeX). Place a single <Toast /> on the page
+// to surface the "Copied ✓" confirmation.
+interface Props {
+  bibtex: string;
+  label?: string;
+}
+const { bibtex, label = "BibTeX" } = Astro.props;
+const ariaLabel = `Copy ${label} to clipboard`;
+---
+
+<button
+  type="button"
+  class="copy-bibtex"
+  data-copy-bibtex
+  data-bibtex={bibtex}
+  aria-label={ariaLabel}
+>
+  {label}
+</button>
+
+<script>
+  async function copyText(text: string): Promise<boolean> {
+    // Preferred path: the async Clipboard API (requires a secure context).
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        /* fall through to the legacy path below */
+      }
+    }
+    // Fallback: an off-screen <textarea> + execCommand("copy").
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-9999px";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+
+  function initCopyBibTeX() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>("[data-copy-bibtex]");
+    buttons.forEach((btn) => {
+      if (btn.dataset.bound) return; // idempotent across view transitions
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", async () => {
+        const text = btn.dataset.bibtex ?? "";
+        if (!text) return;
+        const ok = await copyText(text);
+        const message = ok ? "Copied ✓" : "Copy failed";
+        window.dispatchEvent(new CustomEvent("toast", { detail: { message } }));
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", initCopyBibTeX);
+</script>
+
+<style>
+  .copy-bibtex {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--space-6); /* 24px target */
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    cursor: pointer;
+    /* Cobalt underline draws on hover AND focus (keyboard-equal), matching
+       the global .link treatment. */
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    padding-bottom: 1px;
+    transition:
+      background-size var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  .copy-bibtex:hover,
+  .copy-bibtex:focus-visible {
+    color: var(--accent-press);
+    background-size: 100% 1px;
+  }
+</style>

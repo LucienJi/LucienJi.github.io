@@ -1,0 +1,18 @@
+title: "Bridging the Sim-to-Real Gap with Learned Dynamics Residuals"
+authors:
+  - "D. Lead"
+  - "Your Name"
+  - "S. Advisor"
+venue: "ICRA"
+year: 2024
+type: "conference"
+links:
+  pdf: "#"
+  arxiv: "https://arxiv.org/abs/0000.00000"
+  bibtex: "@inproceedings{lead2024sim2real,\n  title={Bridging the Sim-to-Real Gap with Learned Dynamics Residuals},\n  author={Lead, D. and Name, Your},\n  booktitle={ICRA},\n  year={2024}\n}"
+oneLiner: "A small learned correction makes simulator-trained policies transfer to hardware."
+tags:
+  - "sim2real"
+  - "model-learning"
+  - "robot-learning"
+selected: false

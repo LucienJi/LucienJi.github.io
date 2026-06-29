@@ -1,0 +1,93 @@
+---
+// Toast — a single, transient confirmation pinned bottom-center.
+// Polite ARIA live region; auto-dismisses after ~2s. Place ONCE on any page
+// that needs it (e.g. /research). Trigger it from anywhere on the page with:
+//   window.dispatchEvent(new CustomEvent("toast", { detail: { message: "Copied ✓" } }));
+// Takes no props.
+---
+
+<div class="toast" role="status" aria-live="polite" aria-atomic="true" data-toast>
+  <span class="toast__msg" data-toast-msg></span>
+</div>
+
+<script>
+  const DISMISS_MS = 2000;
+  let toastBound = false;
+
+  function initToast() {
+    // The 'toast' listener must exist exactly once for the session. A
+    // module-scoped flag is the reliable guard: the bundled script runs once
+    // and window survives swaps; a flag on <html> would be wiped by
+    // ClientRouter's swapRootAttributes on every navigation. The toast element
+    // is looked up per-event.
+    if (toastBound) return;
+    toastBound = true;
+
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+    window.addEventListener("toast", (event) => {
+      const detail = (event as CustomEvent<{ message?: string }>).detail;
+      const message = detail?.message?.trim();
+      if (!message) return;
+
+      const toast = document.querySelector<HTMLElement>("[data-toast]");
+      if (!toast) return;
+      const msg = toast.querySelector<HTMLElement>("[data-toast-msg]") ?? toast;
+
+      clearTimeout(hideTimer);
+      // Clear then re-set on the next frame so an identical message
+      // (e.g. copying twice) is announced again by screen readers.
+      msg.textContent = "";
+      requestAnimationFrame(() => {
+        msg.textContent = message;
+      });
+      toast.classList.add("is-visible");
+      hideTimer = setTimeout(() => toast.classList.remove("is-visible"), DISMISS_MS);
+    });
+  }
+
+  document.addEventListener("astro:page-load", initToast);
+</script>
+
+<style>
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: var(--space-6);
+    z-index: 1000;
+    max-width: calc(100vw - var(--space-8));
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-wrap: balance;
+    /* Idle: invisible, out of the way, and never intercepts pointer events.
+       opacity:0 (not display/visibility:none) keeps it in the a11y tree so
+       the live region still announces. */
+    opacity: 0;
+    transform: translateX(-50%) translateY(var(--space-2));
+    pointer-events: none;
+    transition:
+      opacity var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  .toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Honor reduced motion: opacity-only, no vertical travel. */
+  @media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast.is-visible {
+      transform: translateX(-50%);
+    }
+  }
+</style>

@@ -1,0 +1,127 @@
+---
+/**
+ * /cv — Curriculum Vitae / Experience (DESIGN.md §7.4).
+ *
+ * Reads like a printed-CV masthead: a mono "Curriculum Vitae" kicker, the name,
+ * a one-line standfirst, and a prominent primary "Download CV (PDF)" CTA — then
+ * the grouped <Timeline> (Education / Industry & Internships / Service & Teaching
+ * / Awards, with mono tabular dates in the margin rail), and an optional mono
+ * <Tag> row of skills & tools.
+ *
+ * The page rides the wide (1140px) measure; each Timeline row is a `.spread`,
+ * so dates sit in the rail and role/org/summary in the 720px reading column.
+ *
+ * Content: src/content/timeline/*.yaml. The CV PDF lives in /public; its path
+ * is site.cvPdf (CTAButton base-corrects it internally).
+ */
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Eyebrow from "@components/Eyebrow.astro";
+import CTAButton from "@components/CTAButton.astro";
+import Timeline from "@components/Timeline.astro";
+import Tag from "@components/Tag.astro";
+import { site } from "@data/site";
+
+const allTimelineEntries = await getCollection("timeline");
+
+const intro = `${site.role}, ${site.university}. A chronological record of my education, research positions, internships, teaching, and awards.`;
+
+// Placeholder skills / tools — edit to taste (or wire to a collection later).
+const skills = [
+  "Python",
+  "C++",
+  "PyTorch",
+  "JAX",
+  "NumPy",
+  "ROS / ROS 2",
+  "MuJoCo",
+  "Isaac Sim",
+  "CUDA",
+  "Linux",
+  "Git",
+  "Docker",
+  "LaTeX",
+  "Weights & Biases",
+];
+---
+
+<BaseLayout title="CV" description={intro}>
+  <article class="cv section wrap-wide">
+    <header class="cv__head">
+      <Eyebrow>§ Curriculum Vitae</Eyebrow>
+      <h1 class="cv__name">{site.name}</h1>
+      <p class="lede cv__intro">{intro}</p>
+      <div class="cv__actions">
+        <CTAButton href={site.cvPdf} download>
+          Download CV (PDF) <span aria-hidden="true">↧</span>
+        </CTAButton>
+      </div>
+    </header>
+
+    {
+      allTimelineEntries.length > 0 && (
+        <div class="cv__timeline">
+          <Timeline entries={allTimelineEntries} />
+        </div>
+      )
+    }
+
+    {
+      skills.length > 0 && (
+        <section class="cv__skills" aria-labelledby="cv-skills-heading">
+          <h2 id="cv-skills-heading" class="cv__subhead">
+            Skills &amp; Tools
+          </h2>
+          <ul class="cv__tags" role="list">
+            {skills.map((skill) => (
+              <li>
+                <Tag label={skill} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  /* Header — the printed-CV masthead. */
+  .cv__name {
+    margin-top: var(--space-3);
+  }
+  .cv__intro {
+    margin-top: var(--space-4);
+    max-width: 54ch;
+  }
+  .cv__actions {
+    margin-top: var(--space-6);
+  }
+
+  /* Ruled document dividers between the three blocks (whitespace + hairline). */
+  .cv__timeline,
+  .cv__skills {
+    margin-top: var(--space-12);
+    padding-top: var(--space-12);
+    border-top: 1px solid var(--line);
+  }
+
+  /* Skills subhead — mono, to rhyme with the Timeline group subheads. */
+  .cv__subhead {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    color: var(--muted);
+    margin-bottom: var(--space-6);
+  }
+
+  /* Skills / tools tag row (wrapping cloud). */
+  .cv__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+</style>

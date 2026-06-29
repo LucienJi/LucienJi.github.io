@@ -1,0 +1,226 @@
+---
+/**
+ * /research/[slug] — Project deep-dive (DESIGN.md §7.3).
+ *
+ * Reads like a mini paper page: a mono resource row (arXiv · Code · Video ·
+ * Website) at the top, an optional wide cover/teaser figure, then the authored
+ * MDX body in the 720px reading column. Figures written in the MDX may break out
+ * of the column with `class="wide"` (→ the ~1140px wide measure) or the global
+ * `class="full-bleed"` (→ 100vw). Exactly one <h1> (the project title).
+ *
+ * getStaticPaths is gated on `site.features.projects` and skips drafts, so the
+ * route disappears entirely when the feature flag is off.
+ */
+import type { CollectionEntry } from "astro:content";
+import { getCollection, render } from "astro:content";
+
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Prose from "@components/Prose.astro";
+import Eyebrow from "@components/Eyebrow.astro";
+import Tag from "@components/Tag.astro";
+import ResponsiveImage from "@components/ResponsiveImage.astro";
+import { site } from "@data/site";
+import { withBase, isExternal } from "@lib/url";
+
+export async function getStaticPaths() {
+  // Feature-flagged off → emit no routes at all.
+  if (!site.features.projects) return [];
+  // One path per non-draft project; the entry id is the slug.
+  const entries = await getCollection("projects", ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<"projects">;
+}
+
+const { entry }: Props = Astro.props;
+const project = entry.data;
+const { Content } = await render(entry);
+
+// A link is "real" only when non-empty and not the "#" placeholder used in seed
+// content — this keeps dead links out of the row (mirrors PaperCard).
+const hasLink = (v: string | undefined): v is string =>
+  typeof v === "string" && v.trim() !== "" && v.trim() !== "#";
+
+// Internal hrefs get base-prefixed; external (http/mailto/tel) pass through and
+// carry target/rel.
+const resolve = (raw: string) => {
+  const external = isExternal(raw);
+  return { href: external ? raw : withBase(raw), external };
+};
+
+// Resource row, in the order the task specifies.
+const links = project.links;
+const linkRow = (
+  [
+    ["arxiv", "arXiv"],
+    ["code", "Code"],
+    ["video", "Video"],
+    ["website", "Website"],
+  ] as const
+)
+  .filter(([key]) => hasLink(links?.[key]))
+  .map(([key, label]) => ({ label, ...resolve(links?.[key] as string) }));
+
+const cover =
+  typeof project.cover === "string" && project.cover.trim() !== ""
+    ? project.cover
+    : undefined;
+const tags = project.tags;
+---
+
+<BaseLayout title={project.title} description={project.summary}>
+  <article class="project section">
+    <header class="project__head wrap-read">
+      <a class="mlink project__back" href={withBase("/research")}>← Research</a>
+
+      <Eyebrow>§ Research — {project.year}</Eyebrow>
+
+      <h1>{project.title}</h1>
+
+      <p class="lede project__summary">{project.summary}</p>
+
+      {
+        tags.length > 0 && (
+          <ul class="project__tags" role="list">
+            {tags.map((t) => (
+              <li>
+                <Tag label={t} />
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        linkRow.length > 0 && (
+          <ul class="project__links" role="list" aria-label="Project resources">
+            {linkRow.map((l) => (
+              <li>
+                <a
+                  class="mlink"
+                  href={l.href}
+                  target={l.external ? "_blank" : undefined}
+                  rel={l.external ? "noopener noreferrer" : undefined}
+                >
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    {
+      cover && (
+        <figure class="project__cover wrap-wide">
+          <ResponsiveImage
+            src={cover}
+            alt={`${project.title} — cover figure`}
+            mat
+            priority
+          />
+        </figure>
+      )
+    }
+
+    <div class="project__body wrap-read">
+      <Prose>
+        <Content />
+      </Prose>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* Consistent vertical rhythm through the header block. */
+  .project__head > * + * {
+    margin-top: var(--space-4);
+  }
+
+  /* The return control reads as a quiet mono eyebrow above the kicker. */
+  .project__back {
+    display: inline-block;
+  }
+
+  /* Standfirst / teaser summary — kept a touch tighter than the full column. */
+  .project__summary {
+    max-width: 54ch;
+  }
+
+  /* Tag chips. */
+  .project__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+  }
+
+  /* Resource row — mono, dot-separated, with a little extra air above it. */
+  .project__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0;
+    margin-top: var(--space-6);
+  }
+  .project__links > li {
+    display: inline-flex;
+    align-items: center;
+  }
+  .project__links > li + li::before {
+    content: "·";
+    margin-inline-end: var(--space-2);
+    color: var(--faint);
+  }
+
+  /* Mono action link — cobalt, underline draws on hover AND focus (kbd-equal). */
+  .mlink {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    text-decoration: none;
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    padding-bottom: 1px;
+    transition:
+      background-size var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .mlink:hover,
+  .mlink:focus-visible {
+    color: var(--accent-press);
+    background-size: 100% 1px;
+  }
+
+  /* Cover/teaser figure breathes out to the wide measure. */
+  .project__cover {
+    margin-top: var(--space-12);
+  }
+
+  /* MDX body in the 720px reading column. */
+  .project__body {
+    margin-top: var(--space-12);
+  }
+
+  /* Let figures authored in the MDX body break out of the reading column.
+     `.full-bleed` (100vw) is afforded globally; `.wide` (~1140px, centred on the
+     page) is afforded here with the same symmetric-margin idiom the foundation
+     uses for `.full-bleed`. Applies to any `.wide` element inside the body. */
+  .project__body :global(.wide) {
+    width: min(var(--measure-wide), 100vw - 2 * var(--page-gutter));
+    max-width: none;
+    margin-inline: calc(
+      50% - min(var(--measure-wide), 100vw - 2 * var(--page-gutter)) / 2
+    );
+  }
+</style>

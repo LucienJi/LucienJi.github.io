@@ -1,0 +1,417 @@
+---
+/**
+ * /research — Research (The Record) — DESIGN.md §7.2.
+ *
+ * A short research-statement lede in the reading column, then the COMPLETE body
+ * of work: publications grouped by year (newest first), each year a large mono
+ * folio in the `.spread` rail and each paper a <PaperCard>.
+ *
+ * Above the list: a Selected / All scope toggle + mono <Tag> topic filters built
+ * from the union of every publication's tags. Filtering is a small, idempotent
+ * `astro:page-load` island that shows/hides rows by data attributes
+ * (`data-selected`, `data-tags`) — "Selected" keeps only selected===true; tag
+ * clicks keep papers that carry at least one active topic (OR). Active state is
+ * reflected with more than colour (weight + underline + `aria-pressed` on tags;
+ * fill + weight + underline + `aria-pressed` on the scope toggle).
+ *
+ * The full list renders server-side, so filtering is a pure progressive
+ * enhancement: with JS off you still get the entire, scannable record.
+ *
+ * Composes the foundation only (BaseLayout, Eyebrow, PaperCard, Tag, Toast,
+ * the .spread rail + global utilities); no foundation file is modified.
+ */
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Eyebrow from "@components/Eyebrow.astro";
+import PaperCard from "@components/PaperCard.astro";
+import Tag from "@components/Tag.astro";
+import Toast from "@components/Toast.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+type Pub = CollectionEntry<"publications">;
+
+// Newest first; stable tie-break by title so equal-year ordering is deterministic.
+const sorted: Pub[] = (await getCollection("publications")).sort(
+  (a, b) => b.data.year - a.data.year || a.data.title.localeCompare(b.data.title),
+);
+
+// Group by year (insertion order already newest→oldest from the sort above).
+const byYear = new Map<number, Pub[]>();
+for (const entry of sorted) {
+  const list = byYear.get(entry.data.year);
+  if (list) list.push(entry);
+  else byYear.set(entry.data.year, [entry]);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+
+// Topic filters = the de-duplicated union of every publication's tags, A→Z.
+const allTags = [...new Set(sorted.flatMap((e) => e.data.tags))].sort((a, b) =>
+  a.localeCompare(b),
+);
+// Tags are stored as single hyphen-joined tokens (e.g. "robot-learning");
+// show them de-hyphenated, but keep the raw token for matching.
+const prettyTag = (t: string) => t.replace(/-/g, " ");
+
+// Placeholder research statement (calm, editorial; real copy drops in here).
+const statement =
+  "I build robots that learn from interaction — turning messy, real-world experience into behaviour reliable enough to trust, across robot learning, reinforcement learning, perception, and sim-to-real transfer. What follows is the complete record, newest first; filter it by focus, or narrow to the selected highlights.";
+
+// A trimmed, page-specific meta description (≤160 chars) for SEO/social cards.
+const description =
+  "The complete research record — work in robot learning, reinforcement learning, perception, and sim-to-real transfer, newest first.";
+---
+
+<BaseLayout title="Research" description={description}>
+  <section class="section wrap-wide research">
+    <header class="research__head">
+      <Eyebrow>§ The Record</Eyebrow>
+      <h1 class="research__title">Research</h1>
+      <p class="lede research__statement">{statement}</p>
+    </header>
+
+    <div class="research__controls" data-research-filter>
+      <div class="control" role="group" aria-labelledby="research-scope-label">
+        <span class="control__label" id="research-scope-label">Show</span>
+        <div class="scope">
+          <button
+            class="scope__btn"
+            type="button"
+            data-scope="selected"
+            aria-pressed="false">Selected</button
+          >
+          <button
+            class="scope__btn"
+            type="button"
+            data-scope="all"
+            aria-pressed="true">All</button
+          >
+        </div>
+      </div>
+
+      {
+        allTags.length > 0 && (
+          <div class="control control--topics">
+            <span class="control__label" id="research-topics-label">
+              Topics
+            </span>
+            <ul
+              class="topics"
+              role="list"
+              data-tag-list
+              aria-labelledby="research-topics-label"
+            >
+              {allTags.map((tag) => (
+                <li class="topics__item" data-tag={tag}>
+                  <Tag label={prettyTag(tag)} pressed={false} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+
+    <div class="research__results" id="publications" data-results>
+      {
+        years.map((year) => (
+          <div class="spread year-group" data-year-group>
+            <h2 class="rail year-folio">
+              <span class="u-visually-hidden">Publications from </span>
+              {year}
+            </h2>
+            <ul class="main year-group__list" role="list">
+              {byYear.get(year)!.map((entry) => (
+                <li
+                  class="paper-row"
+                  data-paper
+                  data-selected={String(entry.data.selected)}
+                  data-tags={entry.data.tags.join(" ")}
+                >
+                  <PaperCard entry={entry} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+
+      {sorted.length === 0 && (
+        <p class="research__empty">
+          No publications yet — the record will grow as work is published.
+        </p>
+      )}
+
+      <p class="research__empty" data-empty hidden>
+        No publications match these filters.
+        <button class="research__reset" type="button" data-reset>
+          Reset filters
+        </button>
+      </p>
+      <p class="u-visually-hidden" role="status" data-empty-live></p>
+    </div>
+  </section>
+
+  <Toast />
+</BaseLayout>
+
+<style>
+  /* Header: flush-left; the statement holds the reading measure. */
+  .research__title {
+    margin-top: var(--space-3);
+  }
+  .research__statement {
+    margin-top: var(--space-6);
+    max-width: var(--measure-read);
+  }
+
+  /* ---- Controls: scope toggle + topic tags, divided from the list ---- */
+  .research__controls {
+    margin-top: var(--space-12);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6) var(--space-8);
+  }
+  .control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .control__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+  }
+
+  /* Selected / All — a mono segmented control. Active = fill + weight +
+     underline (never colour alone), mirroring the foundation Tag's active cue. */
+  .scope {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .scope__btn {
+    min-height: var(--space-8); /* ≥24px hit area */
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    background: transparent;
+    transition:
+      background var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .scope__btn + .scope__btn {
+    border-left: 1px solid var(--line);
+  }
+  .scope__btn:hover,
+  .scope__btn:focus-visible {
+    color: var(--accent);
+  }
+  .scope__btn[aria-pressed="true"] {
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Topic tag chips wrap freely. */
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+  }
+  .topics__item {
+    display: inline-flex;
+  }
+
+  /* ---- Results: one .spread per year (folio in rail, cards in main) ---- */
+  .research__results {
+    margin-top: var(--space-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+  }
+  .year-group {
+    scroll-margin-top: var(--space-16);
+  }
+
+  /* The year as a large mono folio in the margin rail. Overrides the global
+     .spread > .rail meta defaults (more specific: two classes + page scope). */
+  .rail.year-folio {
+    font-family: var(--font-mono);
+    font-size: var(--fs-h2);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    color: var(--muted);
+  }
+
+  .year-group__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Filtering hides single rows and whole (now-empty) years. The explicit rule
+     on .year-group beats the global `.spread { display: grid }` so a hidden
+     year truly collapses; shown again it returns to the grid. */
+  .paper-row[hidden],
+  .year-group[hidden] {
+    display: none;
+  }
+
+  /* Empty state (only ever shown by the island when a filter clears the list). */
+  .research__empty {
+    margin-top: var(--space-8);
+    color: var(--muted);
+  }
+  .research__reset {
+    margin-left: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    transition: color var(--dur) var(--ease);
+  }
+  .research__reset:hover,
+  .research__reset:focus-visible {
+    color: var(--accent-press);
+  }
+</style>
+
+<script>
+  // Publications filter island — DESIGN.md §7.2.
+  // Idempotent, initialised on every astro:page-load (first load + view
+  // transitions). No animation, so prefers-reduced-motion needs no special case.
+  type Scope = "selected" | "all";
+
+  function initResearchFilter() {
+    const controls = document.querySelector<HTMLElement>("[data-research-filter]");
+    const results = document.querySelector<HTMLElement>("[data-results]");
+    if (!controls || !results) return;
+    if (controls.dataset.bound === "1") return; // guard: one binding per DOM
+    controls.dataset.bound = "1";
+
+    const scopeButtons = Array.from(
+      controls.querySelectorAll<HTMLButtonElement>("[data-scope]"),
+    );
+    const tagList = controls.querySelector<HTMLElement>("[data-tag-list]");
+    const papers = Array.from(
+      results.querySelectorAll<HTMLElement>("[data-paper]"),
+    );
+    const groups = Array.from(
+      results.querySelectorAll<HTMLElement>("[data-year-group]"),
+    );
+    const empty = results.querySelector<HTMLElement>("[data-empty]");
+    const emptyLive = results.querySelector<HTMLElement>("[data-empty-live]");
+    const resetBtn = results.querySelector<HTMLButtonElement>("[data-reset]");
+
+    let scope: Scope = "all";
+    const activeTags = new Set<string>();
+
+    const tokensOf = (el: HTMLElement) =>
+      (el.getAttribute("data-tags") || "").split(/\s+/).filter(Boolean);
+
+    // Re-evaluate every row, collapse empty years, surface the empty state.
+    function apply() {
+      let visible = 0;
+      for (const p of papers) {
+        const scopeOk =
+          scope === "all" || p.getAttribute("data-selected") === "true";
+        const tagsOk =
+          activeTags.size === 0 || tokensOf(p).some((t) => activeTags.has(t));
+        const show = scopeOk && tagsOk;
+        p.hidden = !show;
+        if (show) visible++;
+      }
+      for (const g of groups) {
+        const anyVisible = Array.from(
+          g.querySelectorAll<HTMLElement>("[data-paper]"),
+        ).some((p) => !p.hidden);
+        g.hidden = !anyVisible;
+      }
+      if (empty) empty.hidden = papers.length === 0 || visible !== 0;
+      if (emptyLive) {
+        // Always-present polite region; clear-then-set on the next frame so the
+        // message re-announces each time filters empty the list (cf. Toast.astro).
+        emptyLive.textContent = "";
+        if (visible === 0) {
+          requestAnimationFrame(() => {
+            emptyLive.textContent = "No publications match these filters.";
+          });
+        }
+      }
+    }
+
+    function setScope(next: Scope) {
+      scope = next;
+      for (const b of scopeButtons) {
+        b.setAttribute(
+          "aria-pressed",
+          b.dataset.scope === next ? "true" : "false",
+        );
+      }
+      apply();
+    }
+
+    for (const btn of scopeButtons) {
+      btn.addEventListener("click", () =>
+        setScope((btn.dataset.scope as Scope) || "all"),
+      );
+    }
+
+    if (tagList) {
+      // Delegate so a single listener covers every chip; the chips are real
+      // <button> toggles, so there is no navigation to cancel.
+      tagList.addEventListener("click", (event) => {
+        const target = event.target as HTMLElement | null;
+        const item = target?.closest<HTMLElement>("[data-tag]");
+        if (!item || !tagList.contains(item)) return;
+        const tag = item.getAttribute("data-tag");
+        if (!tag) return;
+        const chip = item.querySelector<HTMLElement>(".tag");
+        const active = !activeTags.has(tag);
+        if (active) activeTags.add(tag);
+        else activeTags.delete(tag);
+        if (chip) {
+          // Reuse the foundation Tag's own active treatment + a non-colour cue.
+          chip.classList.toggle("tag--active", active);
+          chip.setAttribute("aria-pressed", String(active));
+        }
+        apply();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        activeTags.clear();
+        tagList
+          ?.querySelectorAll<HTMLElement>(".tag--active")
+          .forEach((chip) => {
+            chip.classList.remove("tag--active");
+            chip.setAttribute("aria-pressed", "false");
+          });
+        setScope("all"); // also re-applies
+      });
+    }
+
+    apply(); // reconcile on load (and after any in-DOM re-init)
+  }
+
+  document.addEventListener("astro:page-load", initResearchFilter);
+</script>
