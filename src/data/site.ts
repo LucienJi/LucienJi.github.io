@@ -22,8 +22,10 @@ export interface SiteConfig {
   role: string;
   field: string;
   university: string;
+  universityUrl?: string;
   lab?: string;
   advisor?: string;
+  advisorUrl?: string;
   location?: string;
   /** Honest status line (e.g. "Seeking summer 2026 internships"). "" hides it. */
   now: string;
@@ -54,30 +56,32 @@ const features: SiteConfig["features"] = {
 };
 
 export const site: SiteConfig = {
-  name: "Your Name", // EDIT ME
-  shortName: "Y. Name", // EDIT ME — masthead wordmark
+  name: "Jingtian Ji",
+  shortName: "Jingtian Ji", // masthead wordmark
   tagline:
-    "I teach robots to learn from interaction — turning messy real-world data into behavior you can trust.", // EDIT ME
+    "Robotics and machine learning — teaching robots to perceive, understand, and act in the real world.", // TODO: replace with your own one-line thesis
   description:
-    "Robotics + Machine Learning PhD student. Research in robot learning, and a photographer.",
-  role: "PhD Candidate",
-  field: "Robot Learning · Machine Learning",
-  university: "Your University", // EDIT ME
-  lab: "Your Lab", // EDIT ME (optional)
-  advisor: "Prof. Advisor Name", // EDIT ME (optional)
-  location: "City, State", // EDIT ME (optional)
-  now: "Seeking summer 2026 internships", // EDIT ME — or set to "" to hide
-  email: "you@university.edu", // EDIT ME
+    "Jingtian Ji — PhD student in robotics and machine learning at the Toyota Technological Institute at Chicago (TTIC), advised by Matthew R. Walter.",
+  role: "PhD Student",
+  field: "Robotics · Machine Learning",
+  university: "Toyota Technological Institute at Chicago",
+  universityUrl: "https://www.ttic.edu/",
+  lab: "Robot Intelligence through Perception Lab (RIPL)",
+  advisor: "Matthew R. Walter",
+  advisorUrl: "https://home.ttic.edu/~mwalter/",
+  location: "Chicago, IL",
+  now: "", // set a short status to show it on the hero (e.g. "Seeking summer 2026 internships")
+  email: "jijingtian@ttic.edu",
 
   socials: {
-    scholar: "https://scholar.google.com/citations?user=XXXX", // EDIT ME
-    github: "https://github.com/yourhandle", // EDIT ME
-    linkedin: "https://www.linkedin.com/in/yourhandle", // EDIT ME
-    // twitter: "https://x.com/yourhandle",
+    scholar: "https://scholar.google.com/citations?user=DeQM4Z4AAAAJ&hl=en",
+    github: "https://github.com/LucienJi",
+    // linkedin: "https://www.linkedin.com/in/...", // add when you have one
+    // twitter: "https://x.com/...",
     // orcid: "https://orcid.org/0000-0000-0000-0000",
   },
 
-  cvPdf: "/cv.pdf", // place the file at public/cv.pdf
+  cvPdf: "/cv.pdf", // replace public/cv.pdf with your real CV
   url: "https://lucienji.github.io", // GitHub Pages user site
 
   nav: [
