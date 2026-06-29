@@ -78,7 +78,7 @@ export const site: SiteConfig = {
   },
 
   cvPdf: "/cv.pdf", // place the file at public/cv.pdf
-  url: "https://yourname.github.io", // EDIT ME once deployed
+  url: "https://lucienji.github.io", // GitHub Pages user site
 
   nav: [
     { label: "Research", href: "/research" },
