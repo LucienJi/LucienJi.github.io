@@ -45,7 +45,9 @@ const projects = defineCollection({
     title: z.string(),
     summary: z.string(),
     year: z.number(),
-    cover: z.string().optional(),
+    cover: z.string().optional(), // teaser image (path relative to src/assets)
+    teaserVideo: z.string().optional(), // "/media/..." file OR a YouTube/Vimeo URL
+    teaserPoster: z.string().optional(), // poster frame for a self-hosted video (public path/URL)
     tags: z.array(z.string()).default([]),
     links: linksSchema,
     selected: z.boolean().default(false),

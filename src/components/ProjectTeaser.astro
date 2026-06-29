@@ -1,0 +1,95 @@
+---
+/**
+ * ProjectTeaser — a project's teaser as a self-hosted video, a YouTube/Vimeo
+ * embed, or (fallback) a matted cover image. Keeps the matted "hung print"
+ * look consistent with the rest of the site.
+ *
+ *   video  : "/media/projects/<slug>/teaser.mp4"  (self-hosted, in public/)
+ *            | "https://youtu.be/ID" | "https://vimeo.com/123"  (embedded)
+ *   poster : public path / URL for the <video> poster frame (optional)
+ *   cover  : src/assets image path — shown when there is no video
+ */
+import ResponsiveImage from "./ResponsiveImage.astro";
+import { withBase } from "@lib/url";
+
+interface Props {
+  video?: string;
+  poster?: string;
+  cover?: string;
+  alt: string;
+  priority?: boolean;
+  class?: string;
+}
+const { video, poster, cover, alt, priority = false, class: className = "" } = Astro.props;
+
+const ytId = (u: string) =>
+  u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/))([\w-]{11})/)?.[1] ?? null;
+const vimeoId = (u: string) => u.match(/vimeo\.com\/(?:video\/)?(\d+)/)?.[1] ?? null;
+
+const yt = video ? ytId(video) : null;
+const vimeo = video && !yt ? vimeoId(video) : null;
+const embedSrc = yt
+  ? `https://www.youtube-nocookie.com/embed/${yt}`
+  : vimeo
+    ? `https://player.vimeo.com/video/${vimeo}`
+    : null;
+const fileVideo = video && !embedSrc ? (video.startsWith("http") ? video : withBase(video)) : null;
+const posterUrl = poster ? (poster.startsWith("http") ? poster : withBase(poster)) : undefined;
+---
+
+{
+  embedSrc ? (
+    <div class={`pteaser pteaser--embed ${className}`}>
+      <iframe
+        src={embedSrc}
+        title={alt}
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+      />
+    </div>
+  ) : fileVideo ? (
+    <div class={`pteaser ${className}`}>
+      <video class="pteaser__video" controls preload="metadata" playsinline poster={posterUrl}>
+        <source src={fileVideo} />
+        Your browser doesn’t support embedded video. <a href={fileVideo}>Download the clip</a>.
+      </video>
+    </div>
+  ) : cover ? (
+    <ResponsiveImage src={cover} alt={alt} mat priority={priority} class={className} />
+  ) : null
+}
+
+<style>
+  .pteaser {
+    margin: 0;
+  }
+  .pteaser--embed {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--mat);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .pteaser--embed iframe {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .pteaser__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--mat);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: clamp(8px, 1.4vw, 16px);
+  }
+</style>

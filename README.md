@@ -85,6 +85,33 @@ exif:                        # optional; shown as a mono caption line
 
 ---
 
+## Media & assets
+
+Images live in `src/assets/` (optimized at build) and are referenced by a **path relative to `src/assets/`**. Videos live in `public/media/` (served as-is). Every folder has its own `README.md`.
+
+```
+src/assets/
+  portraits/                  # your headshots/selfies — serious.jpg, casual.jpg, …
+  photography/<series-id>/    # one folder per photo theme (matches src/content/series/<id>.yaml)
+  projects/<slug>/            # per-project images: teaser.jpg, fig-01.jpg, …
+public/media/
+  projects/<slug>/teaser.mp4  # project teaser VIDEOS (not optimized)
+```
+
+- **Cover / headshot:** drop files in `portraits/`, then set `portrait: "portraits/serious.jpg"` in `src/content/about/index.mdx`. Keep several styles and swap by changing that one line.
+- **Photo theme:** make a folder under `photography/`, add a matching `src/content/series/<id>.yaml`, then add photos with `src: "photography/<id>/<file>.jpg"`.
+- **Project teaser — image:** `cover: "projects/<slug>/teaser.jpg"` on the project (`src/content/projects/<slug>.mdx`) or its publication.
+- **Project teaser — video:** put the file in `public/media/projects/<slug>/` and set on the project:
+  ```yaml
+  teaserVideo: "/media/projects/<slug>/teaser.mp4"   # self-hosted, OR
+  teaserVideo: "https://youtu.be/XXXXXXXXXXX"          # YouTube/Vimeo (embedded)
+  teaserPoster: "/media/projects/<slug>/poster.jpg"    # optional still frame
+  ```
+
+Filenames may repeat across folders (the path disambiguates); a unique bare filename also resolves.
+
+---
+
 ## Design & customization
 
 - **Colors, type, spacing, motion** are all CSS custom properties in `src/styles/tokens.css` — change them there and the whole site follows. Keep to the one cobalt accent so your photographs provide the color.

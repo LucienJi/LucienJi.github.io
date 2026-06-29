@@ -18,7 +18,7 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import Prose from "@components/Prose.astro";
 import Eyebrow from "@components/Eyebrow.astro";
 import Tag from "@components/Tag.astro";
-import ResponsiveImage from "@components/ResponsiveImage.astro";
+import ProjectTeaser from "@components/ProjectTeaser.astro";
 import { site } from "@data/site";
 import { withBase, isExternal } from "@lib/url";
 
@@ -117,12 +117,13 @@ const tags = project.tags;
     </header>
 
     {
-      cover && (
+      (project.teaserVideo || cover) && (
         <figure class="project__cover wrap-wide">
-          <ResponsiveImage
-            src={cover}
-            alt={`${project.title} — cover figure`}
-            mat
+          <ProjectTeaser
+            video={project.teaserVideo}
+            poster={project.teaserPoster}
+            cover={cover}
+            alt={`${project.title} — teaser`}
             priority
           />
         </figure>
