@@ -1,0 +1,25 @@
+title: "GLOVES: Flow-based Policy Adaptation without Policy Updates"
+authors:
+  - "Luzhe Sun"
+  - "Jingtian Ji"
+  - "Haoran Chen"
+  - "Jiawei Zhou"
+  - "Matthew R. Walter"
+venue: "arXiv preprint"
+year: 2026
+type: "preprint"
+links:
+  arxiv: "https://arxiv.org/abs/2606.06461"
+  project: "/research/gloves"
+  website: "https://ripl.github.io/GLOVES_web/"
+  bibtex: "@misc{sun2026gloves,\n  title={GLOVES: Flow-based Policy Adaptation without Policy Updates},\n  author={Sun, Luzhe and Ji, Jingtian and Chen, Haoran and Zhou, Jiawei and Walter, Matthew R.},\n  year={2026},\n  eprint={2606.06461},\n  archivePrefix={arXiv}\n}"
+oneLiner: "A flow-based module that corrects only the out-of-distribution actions of an existing robot policy, without retraining it."
+tags:
+  - "robot-learning"
+  - "policy-adaptation"
+  - "flow-matching"
+  - "shared-autonomy"
+  - "imitation-learning"
+  - "ood-detection"
+teaser: "projects/gloves/teaser.png"
+selected: true

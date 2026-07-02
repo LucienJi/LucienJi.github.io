@@ -1,0 +1,13 @@
+src: "photography/family/family-02.jpg"
+series: "family"
+order: 2
+span: "single"
+selected: false
+year: 2022
+alt: "Extreme close-up of a white cat's face with half-closed eyes looking downward, a pink nose, and long whiskers, set against a softly blurred warm-toned wooden background."
+exif:
+  camera: "iPhone 11 Pro"
+  focal: "51mm"
+  shutter: "1/50s"
+  aperture: "f/1.8"
+  iso: "ISO 500"

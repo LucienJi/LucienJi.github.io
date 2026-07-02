@@ -1,0 +1,13 @@
+src: "photography/family/family-01.jpg"
+series: "family"
+order: 1
+span: "full"
+selected: true
+year: 2022
+alt: "Extreme close-up of a white cat's face in profile, eyes half-closed, whiskers fanned outward, with softly blurred fur in the foreground and a warm, wood-toned background out of focus behind it."
+exif:
+  camera: "iPhone 11 Pro"
+  focal: "51mm"
+  shutter: "1/50s"
+  aperture: "f/1.8"
+  iso: "ISO 250"

@@ -1,0 +1,14 @@
+src: "photography/city/city-03.jpg"
+series: "city"
+order: 3
+span: "full"
+selected: false
+year: 2024
+alt: "Aerial nighttime view of a cluster of illuminated, tree-shaped lattice towers linked by a lit elevated walkway, rising above a dark canopy of trees, with roads, a large lit building, and city skyscrapers visible in the distance."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "50mm"
+  shutter: "1.3s"
+  aperture: "f/4"
+  iso: "ISO 400"

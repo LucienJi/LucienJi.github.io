@@ -1,0 +1,14 @@
+src: "photography/city/city-05.jpg"
+series: "city"
+order: 5
+span: "single"
+selected: false
+year: 2024
+alt: "A large white-and-red tiered palace with rows of small square windows and zigzagging stone staircases spans a hillside under a bright, partly cloudy sky, with a line of dark conifer trees, parked cars, and pedestrians along a roadside fence in the foreground."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "47mm"
+  shutter: "1/100s"
+  aperture: "f/22"
+  iso: "ISO 200"

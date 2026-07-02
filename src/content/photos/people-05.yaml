@@ -1,0 +1,14 @@
+src: "photography/people/people-05.jpg"
+series: "people"
+order: 5
+span: "single"
+selected: false
+year: 2024
+alt: "Black-and-white night photograph of two people seen from behind, one with short hair and glasses wearing a light T-shirt and the other with long dark hair, both facing a brightly lit city skyline with a tall illuminated tower blurred in the background."
+exif:
+  camera: "Sony a7C II"
+  lens: "Samyang AF 35mm f/1.8"
+  focal: "35mm"
+  shutter: "1/15s"
+  aperture: "f/1.8"
+  iso: "ISO 500"

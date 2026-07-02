@@ -1,0 +1,13 @@
+src: "photography/family/family-12.jpg"
+series: "family"
+order: 12
+span: "full"
+selected: false
+year: 2026
+alt: "Two white cats with folded ears and round amber eyes lie side by side on a textured gray sofa, front paws touching, looking directly at the camera, with beige and olive-green cushions behind them."
+exif:
+  camera: "iPhone 15 Pro"
+  focal: "77mm"
+  shutter: "1/60s"
+  aperture: "f/2.8"
+  iso: "ISO 400"

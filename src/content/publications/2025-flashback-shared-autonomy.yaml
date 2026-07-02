@@ -1,0 +1,24 @@
+title: "FlashBack: Consistency Model-Accelerated Shared Autonomy"
+authors:
+  - "Luzhe Sun"
+  - "Jingtian Ji"
+  - "Xiangshan Tan"
+  - "Matthew R. Walter"
+venue: "CoRL"
+year: 2025
+type: "conference"
+links:
+  arxiv: "https://arxiv.org/abs/2505.16892"
+  code: "https://github.com/ripl/FlashBackSharedAutonomy"
+  project: "/research/flashback-shared-autonomy"
+  website: "https://ripl.github.io/CSA-website/"
+  bibtex: "@inproceedings{sun2025flashback,\n  title={FlashBack: Consistency Model-Accelerated Shared Autonomy},\n  author={Sun, Luzhe and Ji, Jingtian and Tan, Xiangshan and Walter, Matthew R.},\n  booktitle={Conference on Robot Learning (CoRL)},\n  year={2025}\n}"
+oneLiner: "Distills diffusion-based shared autonomy into a one-step consistency model for real-time robot assistance."
+tags:
+  - "shared-autonomy"
+  - "consistency-models"
+  - "diffusion-models"
+  - "robot-learning"
+  - "teleoperation"
+teaser: "projects/flashback-shared-autonomy/teaser.jpg"
+selected: true

@@ -1,0 +1,13 @@
+src: "photography/family/family-05.jpg"
+series: "family"
+order: 5
+span: "single"
+selected: false
+year: 2024
+alt: "Extreme close-up of a gray tabby cat's face tilted upward with eyes squinted, water dripping from a chrome showerhead above onto its wet whiskers and fur, with a bright window blurred in the background."
+exif:
+  camera: "iPhone 15 Pro"
+  focal: "78mm"
+  shutter: "1/121s"
+  aperture: "f/1.8"
+  iso: "ISO 50"

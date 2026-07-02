@@ -1,0 +1,14 @@
+src: "photography/people/people-02.jpg"
+series: "people"
+order: 2
+span: "single"
+selected: false
+year: 2024
+alt: "Two people are seen from behind in silhouette at night, standing close together and facing a waterfront row of illuminated buildings, with colorful lights blurred into soft bokeh across the foreground and background."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 85mm f/1.8"
+  focal: "85mm"
+  shutter: "1/160s"
+  aperture: "f/1.8"
+  iso: "ISO 3200"

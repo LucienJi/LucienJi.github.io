@@ -1,0 +1,14 @@
+src: "photography/people/people-01.jpg"
+series: "people"
+order: 1
+span: "full"
+selected: true
+year: 2024
+alt: "Two grey-haired adults, a man in a dark top and khaki cargo pants and a woman in a dark top, walk down an outdoor stone staircase at night holding hands, both looking down at their feet, with a glowing orange lamppost and a pale metal handrail in the background."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 85mm f/1.8"
+  focal: "85mm"
+  shutter: "1/60s"
+  aperture: "f/1.8"
+  iso: "ISO 3200"

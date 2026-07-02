@@ -1,0 +1,14 @@
+src: "photography/people/people-08.jpg"
+series: "people"
+order: 8
+span: "single"
+selected: false
+year: 2024
+alt: "Black-and-white night photograph, shot from behind, of an adult with an arm around a child seated among other onlookers, all facing a brightly lit high-rise city skyline that dissolves into soft bokeh in the darkness."
+exif:
+  camera: "Sony a7C II"
+  lens: "Samyang AF 35mm f/1.8"
+  focal: "35mm"
+  shutter: "1/13s"
+  aperture: "f/1.8"
+  iso: "ISO 500"

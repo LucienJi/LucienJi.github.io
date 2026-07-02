@@ -1,0 +1,14 @@
+src: "photography/city/city-02.jpg"
+series: "city"
+order: 2
+span: "single"
+selected: false
+year: 2024
+alt: "A nighttime skyline of tall illuminated skyscrapers rises above a waterfront, their lights in white, blue, and amber reflected in the dark water below, with a lit domed pavilion and rows of lower buildings along the shoreline."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "48mm"
+  shutter: "1/2s"
+  aperture: "f/4"
+  iso: "ISO 400"

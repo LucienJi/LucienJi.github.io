@@ -1,0 +1,30 @@
+---
+title: "HapCompass: A Rotational Haptic Device for Contact-Rich Robotic Teleoperation"
+summary: "HapCompass is a wearable haptic device that renders directional touch cues by rotating a single vibration motor, letting teleoperators feel a robot's contact forces during delicate manipulation."
+year: 2026
+cover: "projects/hapcompass/teaser.png"
+tags:
+  - "haptics"
+  - "teleoperation"
+  - "imitation-learning"
+  - "human-robot-interaction"
+  - "manipulation"
+links:
+  arxiv: "https://arxiv.org/abs/2603.30042"
+  code: "https://github.com/ripl/HapCompass"
+  website: "https://ripl.github.io/HapCompass/"
+selected: true
+draft: false
+---
+
+## Abstract
+
+Teleoperating a robot through contact-rich manipulation — inserting a key, seating a USB connector, probing among loose strands of spaghetti — is difficult when an operator has only a visual view of the scene and no direct sense of touch. HapCompass is a wearable haptic device that addresses this gap by rendering two-dimensional directional cues on the operator's fingertip, driven by the robot's own tactile measurements. Rather than arraying several vibration motors around the fingertip, HapCompass mechanically rotates a single linear resonant actuator (LRA) so that one actuator can cover the full 2D direction space. By translating the robot's contact forces into a felt "pull" toward the direction of contact, the device lets operators sense where, and how hard, the robot is touching something — improving both teleoperation performance and the quality of demonstrations collected for imitation learning.
+
+## Method
+
+HapCompass builds its directional feedback on an asymmetric-vibration illusion: the LRA is driven with an asymmetric, non-sinusoidal waveform that produces a higher peak acceleration in one direction than in the other. On the fingertip, this reads not as an undirected buzz but as an illusory pull toward the direction of the stronger acceleration. A decoupled two-part housing — an inner shell that contacts the finger and an outer shell that isolates the mechanism — transmits this vibration to the fingertip efficiently while keeping it isolated from the rest of the device's structure. To cover the full 2D feedback plane with a single actuator, the LRA is mounted in a small rotor that a servo motor turns via a drive belt; rotating the actuator to different angles renders cues in any direction, avoiding the perceptual interference that can arise from firing multiple fixed, orthogonal actuators at once. On the robot side, tactile sensors measure changes in contact force during teleoperation; this delta-force vector is transformed into the device's frame and projected onto its 2D feedback plane, with the resulting vector's direction setting the servo angle and its magnitude setting the LRA's vibration amplitude — so the operator feels, in real time, the direction and strength of the robot's contact.
+
+## Results
+
+The authors first tested whether users can identify HapCompass's rendered directions in isolation, using 4- and 8-alternative forced-choice tasks; participants reached 84.4% accuracy with four candidate directions and 67.2% with eight, both well above chance, indicating that the device conveys direction reliably. They then evaluated teleoperation on three contact-rich tasks — Key Insertion, USB Insertion, and Spaghetti Probing — comparing directional haptic feedback against vision-only and non-directional tactile baselines; directional feedback improved task success rates and generally reduced peak contact forces and bending torques across the tasks. Finally, in a preliminary imitation-learning evaluation on a simplified Key Insertion task, policies trained on demonstrations collected with directional feedback achieved higher rollout success and lower peak forces and bending torques than policies trained on demonstrations collected with non-directional tactile feedback, suggesting that better haptic feedback during teleoperation can translate into better training data for learned policies.

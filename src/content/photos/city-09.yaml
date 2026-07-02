@@ -1,0 +1,14 @@
+src: "photography/city/city-09.jpg"
+series: "city"
+order: 9
+span: "single"
+selected: false
+year: 2024
+alt: "A large green apple sculpture sits on a concrete plaza in front of a modern building with a tall glass curtain-wall facade and a wide outdoor staircase, photographed under overcast light with the rest of the scene rendered in grayscale."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "20mm"
+  shutter: "1/3200s"
+  aperture: "f/4"
+  iso: "ISO 800"

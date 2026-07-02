@@ -1,0 +1,25 @@
+title: "HapCompass: A Rotational Haptic Device for Contact-Rich Robotic Teleoperation"
+authors:
+  - "Xiangshan Tan"
+  - "Jingtian Ji"
+  - "Tianchong Jiang"
+  - "Pedro Lopes"
+  - "Matthew R. Walter"
+venue: "ICRA"
+year: 2026
+type: "conference"
+links:
+  arxiv: "https://arxiv.org/abs/2603.30042"
+  code: "https://github.com/ripl/HapCompass"
+  project: "/research/hapcompass"
+  website: "https://ripl.github.io/HapCompass/"
+  bibtex: "@inproceedings{tan2026hapcompass,\n  title={HapCompass: A Rotational Haptic Device for Contact-Rich Robotic Teleoperation},\n  author={Tan, Xiangshan and Ji, Jingtian and Jiang, Tianchong and Lopes, Pedro and Walter, Matthew R.},\n  booktitle={IEEE International Conference on Robotics and Automation (ICRA)},\n  year={2026}\n}"
+oneLiner: "A single-actuator wearable haptic device that renders directional touch cues to improve contact-rich robot teleoperation and imitation learning."
+tags:
+  - "haptics"
+  - "teleoperation"
+  - "imitation-learning"
+  - "human-robot-interaction"
+  - "manipulation"
+teaser: "projects/hapcompass/teaser.png"
+selected: true

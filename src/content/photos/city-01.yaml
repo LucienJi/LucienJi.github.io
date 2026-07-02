@@ -1,0 +1,14 @@
+src: "photography/city/city-01.jpg"
+series: "city"
+order: 1
+span: "single"
+selected: false
+year: 2024
+alt: "A night-time aerial view across a harbor shows a dense, illuminated city skyline in the distance, a curved lit bridge and an angular glass building along the waterfront, and in the foreground a scalloped rooftop terrace streaked with red, white, and cyan light trails under a dark, cloudy sky."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "20mm"
+  shutter: "1/2s"
+  aperture: "f/4"
+  iso: "ISO 400"

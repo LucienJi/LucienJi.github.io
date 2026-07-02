@@ -1,0 +1,31 @@
+---
+title: "Do You Know Where Your Camera Is? View-Invariant Policy Learning with Camera Conditioning"
+summary: "Robot policies often memorize camera position from background cues; this ICRA 2026 paper makes camera pose an explicit input, so robots keep working when the camera moves."
+year: 2026
+cover: "projects/know-your-camera/teaser.jpg"
+teaserVideo: "https://www.youtube.com/watch?v=05bLrbXOChI"
+tags:
+  - "imitation-learning"
+  - "behavior-cloning"
+  - "camera-conditioning"
+  - "view-invariance"
+  - "robot-manipulation"
+links:
+  arxiv: "https://arxiv.org/abs/2510.02268"
+  code: "https://github.com/ripl/CamPoseOpensource"
+  website: "https://ripl.github.io/know_your_camera/"
+selected: true
+draft: false
+---
+
+## Abstract
+
+Policies trained by imitation learning are usually built and evaluated with a fixed, unremarked-upon camera: the same viewpoint used to collect demonstrations is assumed to hold at deployment. This paper studies what happens when that assumption breaks, and proposes a simple fix. Rather than hoping a policy will generalize across camera viewpoints on its own, the authors explicitly condition behavior-cloning policies on the camera's extrinsics, representing every pixel as a Plücker ray computed from the camera's intrinsics and pose. Across three widely used policy architectures — ACT, Diffusion Policy, and SmolVLA — this geometric conditioning consistently improves generalization to unseen camera viewpoints, restoring robust RGB-only control without requiring depth sensing.
+
+## Method
+
+Given camera intrinsics and extrinsics, each pixel is mapped to a 6D Plücker ray (a direction plus a moment vector), producing a per-pixel raymap that encodes where the camera sits and which way each pixel looks. This raymap is fused with the RGB image in one of two ways. When a policy uses a pretrained visual encoder, a small separate CNN instead encodes the Plücker raymap into the same latent dimension as the image features, and the two are concatenated before the policy network — leaving the pretrained encoder's own image input unchanged. When no pretrained encoder is used, the raymap is concatenated with the raw image channel-wise and passed through a single shared encoder. This conditioning is layered onto three standard behavior-cloning policies — ACT, Diffusion Policy, and SmolVLA. To test whether policies rely on camera geometry rather than memorized scene appearance, the authors built six manipulation tasks (Lift, Pick Place Can, Assembly Square, Push, Lift Upright, Roll Ball) in RoboSuite and ManiSkill, each with paired "fixed" and "randomized" scene variants that decouple background cues from camera pose, and validated the approach on a real UR5 arm with three movable cameras across Pick Place, Plate Insertion, and Hang Mug tasks.
+
+## Results
+
+Camera conditioning improves nearly every policy/task combination under randomized camera poses: ACT's success rate on Lift rises from 33.6% to 60.6% when conditioned on camera pose, and SmolVLA improves similarly on the same task, from 19.6% to 54.4%. Comparing fixed and randomized camera settings clarifies why this helps — unconditioned policies do noticeably better with a fixed camera than a randomized one (ACT drops from 54.8% to 33.6% success on Lift), suggesting they had been reading camera pose off static background cues rather than solving the task; explicit conditioning closes much of that gap. Two ablations stand out. Random cropping must be applied jointly to the image and the Plücker map, or conditioning can backfire: on Lift, conditioning without cropping drops success from 23.1% to 15.9%, whereas conditioning with cropping lifts it to 60.6%. And while a delta end-effector action space performs best overall, camera conditioning helps across every action space tested. Real-robot trials on a UR5 broadly echo the simulated findings: ACT benefited clearly and consistently, for instance rising from 2 to 19 successes out of 21 trials on the Pick Place task, while gains for Diffusion Policy were smaller and more mixed, particularly on the hardest task. The paper received the Best Paper Award on Robot Learning at ICRA 2026.

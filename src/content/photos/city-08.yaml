@@ -1,0 +1,14 @@
+src: "photography/city/city-08.jpg"
+series: "city"
+order: 8
+span: "full"
+selected: true
+year: 2024
+alt: "A high-angle interior view of a library with two towering wood-grid bookshelves rising to a high ceiling on either side, a few people seated at tables on the dark floor below, a tall glass entrance at the far end letting in bright daylight, and a dark wall with an illuminated cross-shaped light cutout on the right."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "20mm"
+  shutter: "1/40s"
+  aperture: "f/4"
+  iso: "ISO 125"

@@ -1,0 +1,13 @@
+src: "photography/family/family-04.jpg"
+series: "family"
+order: 4
+span: "single"
+selected: false
+year: 2024
+alt: "A close-up, low-angle photograph of a gray tabby cat drinking from a thin stream of water flowing out of a metal faucet, its backlit whiskers catching the light against a blurred building in the background."
+exif:
+  camera: "iPhone 15 Pro"
+  focal: "48mm"
+  shutter: "1/132s"
+  aperture: "f/1.8"
+  iso: "ISO 64"

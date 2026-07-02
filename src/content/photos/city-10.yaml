@@ -1,0 +1,14 @@
+src: "photography/city/city-10.jpg"
+series: "city"
+order: 10
+span: "single"
+selected: false
+year: 2024
+alt: "A large green apple sculpture with a black stem stands on a paved concrete plaza beside a minimalist concrete building with tall glass-and-steel windows and a flat cantilevered roof, under a flat white overcast sky with trees visible in the distance."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "43mm"
+  shutter: "1/2500s"
+  aperture: "f/4"
+  iso: "ISO 500"

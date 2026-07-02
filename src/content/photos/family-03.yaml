@@ -1,0 +1,13 @@
+src: "photography/family/family-03.jpg"
+series: "family"
+order: 3
+span: "single"
+selected: false
+year: 2022
+alt: "A close-up portrait of a white cat with heterochromia (one green eye, one blue eye) looking toward the camera, with a person's forearm and wristwatch in the foreground and a second cat blurred in the background near a dark shelf."
+exif:
+  camera: "iPhone 11 Pro"
+  focal: "26mm"
+  shutter: "1/50s"
+  aperture: "f/1.8"
+  iso: "ISO 320"

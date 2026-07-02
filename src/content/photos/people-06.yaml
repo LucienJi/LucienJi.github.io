@@ -1,0 +1,14 @@
+src: "photography/people/people-06.jpg"
+series: "people"
+order: 6
+span: "full"
+selected: true
+year: 2024
+alt: "Black-and-white photograph of two people seen from behind and in profile, leaning on a railing as they look out across a river toward a brightly lit city skyline rendered in soft, blurred bokeh at night."
+exif:
+  camera: "Sony a7C II"
+  lens: "Samyang AF 35mm f/1.8"
+  focal: "35mm"
+  shutter: "1/40s"
+  aperture: "f/1.8"
+  iso: "ISO 500"

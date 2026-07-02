@@ -1,0 +1,14 @@
+src: "photography/city/city-07.jpg"
+series: "city"
+order: 7
+span: "single"
+selected: false
+year: 2024
+alt: "A person with short dark hair, wearing a rust-orange jacket, stands with their back to the camera in a dim, bare concrete room, facing a bright horizontal and vertical beam of light that cross to form an X on the wall to their left."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "70mm"
+  shutter: "1/20s"
+  aperture: "f/4"
+  iso: "ISO 200"

@@ -1,0 +1,14 @@
+src: "photography/family/family-10.jpg"
+series: "family"
+order: 10
+span: "single"
+selected: false
+year: 2024
+alt: "A woman in a floral kimono is photographed in profile, raising a dark patterned folding fan near her face, with a row of blurred red torii gate posts glowing softly behind her."
+exif:
+  camera: "Sony a7C II"
+  lens: "Samyang AF 35mm f/1.8"
+  focal: "35mm"
+  shutter: "1/640s"
+  aperture: "f/1.8"
+  iso: "ISO 160"

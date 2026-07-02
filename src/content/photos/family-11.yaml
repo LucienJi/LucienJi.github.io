@@ -1,0 +1,13 @@
+src: "photography/family/family-11.jpg"
+series: "family"
+order: 11
+span: "single"
+selected: false
+year: 2025
+alt: "A calico cat sits in a loaf position on a white quilted blanket, looking directly at the camera, with a wood-paneled wall to the left and a plain wall behind."
+exif:
+  camera: "iPhone 15 Pro"
+  focal: "35mm"
+  shutter: "1/60s"
+  aperture: "f/1.8"
+  iso: "ISO 400"

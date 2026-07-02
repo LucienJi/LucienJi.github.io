@@ -1,0 +1,14 @@
+src: "photography/city/city-15.jpg"
+series: "city"
+order: 15
+span: "single"
+selected: false
+year: 2024
+alt: 'Black-and-white night photograph of an ornate stone hotel facade with three flags and large reflective Chinese characters above a marquee reading "PEACE HOTEL," a light-strung canopy over the entrance, one person standing still near the doorway, and a crowd of people blurred by motion in the foreground.'
+exif:
+  camera: "Sony a7C II"
+  lens: "Samyang AF 35mm f/1.8"
+  focal: "35mm"
+  shutter: "1/5s"
+  aperture: "f/7.1"
+  iso: "ISO 500"

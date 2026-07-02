@@ -1,0 +1,30 @@
+---
+title: "GLOVES: Flow-based Policy Adaptation without Policy Updates"
+summary: "GLOVES nudges an existing robot policy's flawed actions back toward expert behavior using a learned flow model, stepping in only when an action looks anomalous, without ever retraining the policy."
+year: 2026
+cover: "projects/gloves/teaser.png"
+tags:
+  - "robot-learning"
+  - "policy-adaptation"
+  - "flow-matching"
+  - "shared-autonomy"
+  - "imitation-learning"
+  - "ood-detection"
+links:
+  arxiv: "https://arxiv.org/abs/2606.06461"
+  website: "https://ripl.github.io/GLOVES_web/"
+selected: true
+draft: false
+---
+
+## Abstract
+
+Pretrained robot policies, foundation models, and even human teleoperators offer a shortcut past learning skills from scratch, but their actions are often imperfect — noisy, suboptimal, or subtly misaligned with what a task actually requires. GLOVES addresses this gap with a family of flow-based adaptation methods that correct non-expert actions by transporting them toward an expert action distribution, rather than replacing the underlying controller outright. The approach is deliberately selective: the same learned flow used for correction also yields, via reverse flow evaluation, an in-distribution score that doubles as an intervention gate. Actions that already look consistent with expert behavior pass through untouched; only anomalous or out-of-distribution actions are adapted, so assistance is provided only when necessary. This lets GLOVES preserve a base agent's intent rather than overriding it wholesale, and it needs only a small number of demonstrations or reusable successful skill segments to do so, with no retraining of the underlying policy.
+
+## Method
+
+GLOVES trains a flow model on a modest set of expert demonstrations or reusable successful skill segments, learning local patterns of expert action and stitching them together at execution time rather than requiring one policy that covers an entire task. This expert flow does double duty: it scores, and when needed edits, the base agent's proposed action chunks. Scoring runs the flow backward on a candidate action and treats the negative prior log-likelihood as a nonconformity measure; conformal prediction against a calibration set of expert action-context pairs converts this into a p-value, and chunks whose p-value clears a threshold are executed unchanged while the rest are routed to correction. GLOVES instantiates the correction step in three ways — FPAS (flow-prior action sampling), FEEG (energy-guided flow editing), and IFAE (inversion-free editing) — each a different mechanism for pulling an out-of-distribution action back toward the learned expert distribution. Because the gate and corrector act purely on actions at inference time, GLOVES can wrap essentially any base agent — a fine-tuned vision-language-action (VLA) policy, another imitation-learning agent, or a human operator — as a lightweight, model-agnostic shared-control layer, without touching the base policy's weights.
+
+## Results
+
+GLOVES is evaluated on real hardware and in simulation. On two real-robot manipulation tasks built around a fine-tuned VLA base policy, action-level correction produces large gains in trial success counts. On charger insertion (40 trials each), the base policy succeeds 18 times, a baseline corrector (CSA) 21 times, and the GLOVES variants 22 (FPAS), 27 (IFAE), and 40 out of 40 (FEEG). On cup serving (30 trials each), the base policy succeeds only twice, typically failing via collision; the CSA baseline reaches 4, and the GLOVES variants reach 16 (IFAE), 17 (FPAS), and 22 (FEEG), though not every corrected rollout was fully collision-free. In simulation, across four manipulation tasks (Slalom, Can, Keypad, Charger) and four kinds of degraded base agents (laggy, noised, slow, shift), GLOVES variants — including OOD-gated versions of FEEG and IFAE — are compared against two baseline correction methods (DDPM and CSA) and the uncorrected agent. Across the sixteen task-agent combinations tested, some GLOVES variant places in the top three every time, and a GLOVES method, most often FEEG or IFAE, wins outright in 13 of the 16, with CSA taking the rest. On the VLA-based simulated tasks specifically, IFAE roughly doubles the base policy's success rate (30.0% vs. 15.67% on Slalom; 42.5% vs. 15.67% on Can). Together, the real-robot and simulation results support the central claim: selective, flow-based action correction can meaningfully improve task success without retraining the underlying policy.

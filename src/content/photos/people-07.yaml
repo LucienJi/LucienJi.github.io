@@ -1,0 +1,14 @@
+src: "photography/people/people-07.jpg"
+series: "people"
+order: 7
+span: "single"
+selected: false
+year: 2024
+alt: "Black-and-white photo taken from behind of two people sitting close together, shoulders touching, facing a nighttime city skyline across water with a tall illuminated tower and softly blurred bokeh lights filling the background."
+exif:
+  camera: "Sony a7C II"
+  lens: "Samyang AF 35mm f/1.8"
+  focal: "35mm"
+  shutter: "1/20s"
+  aperture: "f/1.8"
+  iso: "ISO 500"

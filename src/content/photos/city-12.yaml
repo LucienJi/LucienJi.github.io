@@ -1,0 +1,14 @@
+src: "photography/city/city-12.jpg"
+series: "city"
+order: 12
+span: "single"
+selected: false
+year: 2024
+alt: "A low-angle photograph looking straight up at a curved, pinwheel-shaped metal sculpture mounted atop a slender pole, silhouetted against an overcast white sky, with the sharp diagonal edge of a dark building facade cutting across the upper right corner of the frame."
+exif:
+  camera: "Sony a7C II"
+  lens: "FE 20–70mm f/4 G"
+  focal: "20mm"
+  shutter: "1/8000s"
+  aperture: "f/4"
+  iso: "ISO 500"

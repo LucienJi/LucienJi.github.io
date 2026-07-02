@@ -1,0 +1,14 @@
+src: "photography/family/family-06.jpg"
+series: "family"
+order: 6
+span: "single"
+selected: false
+year: 2024
+alt: "A young woman in a black-and-white checkered kimono with a pink floral pattern stands on stone steps, eyes closed, holding an open black fan beside her face, with the red beams and lattice windows of a Japanese shrine gate blurred behind her."
+exif:
+  camera: "Sony a7C II"
+  lens: "Samyang AF 35mm f/1.8"
+  focal: "35mm"
+  shutter: "1/3200s"
+  aperture: "f/1.8"
+  iso: "ISO 200"

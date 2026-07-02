@@ -1,0 +1,35 @@
+---
+title: "FlashBack: Consistency Model-Accelerated Shared Autonomy"
+summary: "FlashBack (CSA) distills diffusion-based shared autonomy into a one-step consistency model, letting a robot offer real-time, tunable assistance to a human operator."
+year: 2025
+cover: "projects/flashback-shared-autonomy/teaser.jpg"
+teaserVideo: "https://www.youtube.com/watch?v=MrKrnHhk8IA"
+tags:
+  - "shared-autonomy"
+  - "consistency-models"
+  - "diffusion-models"
+  - "robot-learning"
+  - "teleoperation"
+links:
+  arxiv: "https://arxiv.org/abs/2505.16892"
+  code: "https://github.com/ripl/FlashBackSharedAutonomy"
+  website: "https://ripl.github.io/CSA-website/"
+selected: true
+draft: false
+---
+
+## Abstract
+
+Shared autonomy lets a person direct a robot that would otherwise be difficult or impossible to control directly, but most methods assume something designers rarely have in advance: knowledge of the user's goal or reward function, an explicit model of the user's policy, or query-level access to the user during training. Diffusion-based shared autonomy avoids these assumptions, learning only from demonstrations of desired behavior while letting the user keep control authority — but the heavy, multi-step sampling diffusion models require has kept such systems from running in real time. FlashBack introduces Consistency Shared Autonomy (CSA), which reformulates that diffusion process around a consistency model so a corrected action can be produced in a single step instead of dozens. Across simulated and real-world robot control problems, the authors report significant gains over existing shared-autonomy methods in both task performance and computational efficiency, while allowing the level of assistance to be adjusted at inference time.
+
+## Method
+
+CSA is built in two stages. First, an ODE-based diffusion "teacher" model learns to incrementally denoise a noisy action along a deterministic probability-flow ODE trajectory. Because that trajectory is deterministic, a "student" model is then distilled from it: a consistency model that maps a noisy action directly to a clean one in a single function evaluation rather than iterating through the full trajectory.
+
+At inference time, the user's proposed action is treated as a point partway along that same denoising trajectory, governed by a scalar the authors call the partial diffusion ratio. It sets how far the user's raw input is pushed toward the learned action distribution before the student model corrects it in one step, functioning as the assistance level — trading fidelity to what the user actually did against conformity to the behavior seen in demonstrations.
+
+A further mechanism, denoted CSA†, targets a failure mode of that trade-off: as assistance increases, the system can start overriding what the user meant to do. During training, CSA† is randomly conditioned on either the current state alone or the current and next state together, so it also learns the direction the user is heading, not just their instantaneous action. This makes performance far less sensitive to the chosen assistance level; without it, performance rises and then falls away sharply once assistance passes a narrow sweet spot. The pipeline is task-agnostic, with fixed hyperparameters and no per-task tuning required.
+
+## Results
+
+On simulated Lunar Lander control, tested against three imperfect simulated pilots ("laggy," "noisy," and "noised"), CSA and CSA† are compared with an unassisted surrogate pilot and with a prior diffusion-based baseline that needs 24 function evaluations per action. Across the three pilots, the baseline's success rate is roughly 56–76%, versus roughly 85–95% for CSA and CSA†, with correspondingly lower crash rates; inference time drops from roughly 14–19 ms to about 1–2 ms, using a single function evaluation instead of 24 — consistent with the claimed 15×+ speed-up on this task. Separate simulated experiments on peg-insertion and charger-plug-insertion tasks sweep the assistance level directly: CSA† holds a comparatively stable success rate across a wide range of levels, while the diffusion baseline and plain CSA stay reliable only within a narrow band before collapsing. Finally, in a real-robot user study on peg insertion, where the operator worked from a camera feed rather than a direct view, CSA significantly improved both the success rate and the time to complete the task.
