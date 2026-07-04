@@ -1,0 +1,5 @@
+# Allow all crawlers full access, and point them at the sitemap.
+User-agent: *
+Allow: /
+
+Sitemap: https://lucienji.github.io/sitemap-index.xml

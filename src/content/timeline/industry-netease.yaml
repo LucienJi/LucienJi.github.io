@@ -1,0 +1,10 @@
+role: "Game AI Algorithm Intern"
+org: "NetEase AI Lab"
+location: "China"
+start: "2023-04"
+end: "2023-08"
+type: "industry"
+summary: "Game AI framework with curriculum learning and self-play on a distributed RL stack (CPU clusters + multi-GPU). 1st place, IJCAI Olympic competition."
+tags:
+  - "reinforcement-learning"
+  - "self-play"

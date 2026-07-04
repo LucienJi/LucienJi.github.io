@@ -1,0 +1,158 @@
+%==============================================================================
+%  Jingtian Ji — Curriculum Vitae
+%------------------------------------------------------------------------------
+%  YEARLY UPDATE GUIDE
+%    • This file is the single source. Edit the blocks below, then run `make`
+%      (or `latexmk -pdf cv.tex`) to rebuild cv.pdf. `make publish` copies the
+%      result to ../public/cv.pdf so the website serves the new version.
+%    • Each section is a clearly-labelled block. To add a paper/job, copy an
+%      existing entry and edit it. Newest items go FIRST.
+%    • \me expands to your name in bold — used to highlight yourself in author
+%      lists (mirrors the website convention).
+%
+%  TOGGLES (privacy / variants) — flip these two lines:
+%    \showphonetrue   -> \showphonefalse  hides the phone number (use for the
+%                        PUBLIC web copy that is hosted on the site).
+%    \showphotofalse  (reserved; no photo used here — kept for future variants)
+%
+%  Build engine: pdfLaTeX (TeX Live). Requires: fontawesome5, titlesec,
+%  enumitem, microtype, hyperref, geometry — all in a standard TeX Live install.
+%==============================================================================
+\documentclass[10pt,letterpaper]{article}
+
+% ---- Encoding & fonts --------------------------------------------------------
+\usepackage[T1]{fontenc}          % proper accented glyphs (É, ô, é, …)
+\usepackage[utf8]{inputenc}       % read UTF-8 source directly
+\usepackage{lmodern}              % Latin Modern (clean serif, matches the look)
+
+% ---- Page geometry -----------------------------------------------------------
+\usepackage[letterpaper,
+            top=1.3cm, bottom=1.3cm, left=1.9cm, right=1.9cm,
+            footskip=0.6cm]{geometry}
+
+% ---- Utilities ---------------------------------------------------------------
+\usepackage{xcolor}
+\usepackage{fontawesome5}         % \faPhone*, \faEnvelope*, \faGithub, \faGlobe …
+\usepackage{enumitem}             % tight lists
+\usepackage{titlesec}             % small-caps section headers with a rule
+\usepackage[tracking=true]{microtype}   % lets us letter-space the name (\textls)
+\usepackage[hidelinks]{hyperref}  % clickable, but printed in plain black
+\hypersetup{
+  pdfauthor={Jingtian Ji},
+  pdftitle={Jingtian Ji — Curriculum Vitae},
+  pdfsubject={Curriculum Vitae},
+}
+
+% ---- Layout defaults ---------------------------------------------------------
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+\setlist[itemize]{leftmargin=1.35em, topsep=1.5pt, itemsep=1.5pt, parsep=0pt,
+                  label=\textbullet}
+
+% ---- Section header: SMALL CAPS + full-width rule underneath ----------------
+\titleformat{\section}
+  {\normalsize\bfseries\scshape}{}{0em}{}[{\vspace{1pt}\titlerule[0.6pt]}]
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+
+% ---- Helper macros -----------------------------------------------------------
+% A row whose second argument is flush right (used for dated entries).
+\newcommand{\daterow}[2]{\noindent#1\hfill#2\par}
+% Your name, bold — highlight yourself in author lists.
+\newcommand{\me}{\textbf{Jingtian Ji}}
+% Separator for the contact line.
+\newcommand{\cvsep}{\enspace\textbullet\enspace}
+
+% ---- Privacy / variant toggles ----------------------------------------------
+\newif\ifshowphone
+\showphonefalse  % <- public web copy hides the phone; \showphonetrue for private/application builds
+
+%==============================================================================
+\begin{document}
+
+% =========================== HEADER ==========================================
+\begin{center}
+  {\Huge\scshape\textls[120]{Jingtian Ji}}\\[5pt]
+  \small
+  % --- line 1: email + phone ---
+  \faEnvelope~\href{mailto:jijingtian@ttic.edu}{jijingtian@ttic.edu}%
+  % Phone is hidden on the public copy (\showphonefalse) and the real number is
+  % kept OUT of this public repo. For a private/application build, type your
+  % number below and set \showphonetrue above.
+  \ifshowphone \cvsep \faPhone~(+1)~XXX-XXX-XXXX\fi
+  \\[3pt]
+  % --- line 2: website + scholar + github ---
+  \faGlobe~\href{https://lucienji.github.io}{lucienji.github.io}%
+  \cvsep
+  \faUserGraduate~\href{https://scholar.google.com/citations?user=DeQM4Z4AAAAJ&hl=en}{Google Scholar}%
+  \cvsep
+  \faGithub~\href{https://github.com/LucienJi}{github.com/LucienJi}
+\end{center}
+
+% =========================== EDUCATION =======================================
+\section{Education}
+
+\daterow{\textbf{Toyota Technological Institute at Chicago (TTIC)} \textbullet\ Chicago, IL, USA}{Sep.\ 2024 -- Present}
+\textit{Ph.D.\ Student, Computer Science (Robotics)} \textbullet\ Advisor: Prof.\ Matthew R.\ Walter
+\vspace{2pt}
+
+\daterow{\textbf{Shanghai Jiao Tong University} \textbullet\ Shanghai, China}{Sep.\ 2022 -- Mar.\ 2024}
+\textit{M.\,Eng.\ Electronic and Information Engineering} \textbullet\ GPA: 3.96/4.00
+\vspace{2pt}
+
+\daterow{\textbf{École Polytechnique} \textbullet\ Palaiseau, France}{Mar.\ 2020 -- Sep.\ 2022}
+\textit{Diplôme d'Ingénieur (M.\,Eng.)\ in Computer Science} \textbullet\ GPA: 3.81/4.00
+\vspace{2pt}
+
+\daterow{\textbf{Shanghai Jiao Tong University} \textbullet\ Shanghai, China}{Sep.\ 2017 -- Mar.\ 2020}
+\textit{B.\,Eng.\ Information Engineering} \textbullet\ GPA: 3.93/4.30 \textbullet\ Rank: 1/12
+\vspace{2pt}
+
+\daterow{\textbf{Jingcai High School} \textbullet\ Shanghai, China}{Sep.\ 2015 -- Jun.\ 2017}
+
+% =========================== PUBLICATIONS ====================================
+% Newest first. \me = your name in bold. Copy one \item block to add a paper.
+\section{Publications}
+\begin{itemize}
+  \item Tianchong Jiang, \me, Xiangshan Tan, Jiading Fang, Anand Bhattad, Vitor Guizilini, Matthew R.\ Walter, ``Do You Know Where Your Camera Is? View-Invariant Policy Learning with Camera Conditioning,'' \textit{IEEE International Conference on Robotics and Automation (ICRA)}, 2026. \textbf{Best Paper Award on Robot Learning.} \href{https://arxiv.org/abs/2510.02268}{arXiv:2510.02268}.
+
+  \item Xiangshan Tan, \me, Tianchong Jiang, Pedro Lopes, Matthew R.\ Walter, ``HapCompass: A Rotational Haptic Device for Contact-Rich Robotic Teleoperation,'' \textit{IEEE International Conference on Robotics and Automation (ICRA)}, 2026. \href{https://arxiv.org/abs/2603.30042}{arXiv:2603.30042}.
+
+  \item Luzhe Sun, \me, Haoran Chen, Jiawei Zhou, Matthew R.\ Walter, ``GLOVES: Flow-based Policy Adaptation without Policy Updates,'' \textit{arXiv preprint} \href{https://arxiv.org/abs/2606.06461}{arXiv:2606.06461}, 2026.
+
+  \item Luzhe Sun, \me, Xiangshan Tan, Matthew R.\ Walter, ``FlashBack: Consistency Model--Accelerated Shared Autonomy,'' \textit{Conference on Robot Learning (CoRL)}, 2025. \href{https://arxiv.org/abs/2505.16892}{arXiv:2505.16892}.
+
+  \item Jianming Ma, \me, Yue Gao, ``Adversarial Constrained Policy Optimization: Improving Constrained Reinforcement Learning by Adapting Budgets,'' \textit{arXiv preprint} \href{https://arxiv.org/abs/2410.20786}{arXiv:2410.20786}, 2024.
+
+  \item Buqing Nie, \me, Yangqing Fu, Yue Gao, ``Improve Robustness of Reinforcement Learning against Observation Perturbations via $\ell_\infty$ Lipschitz Policy Networks,'' \textit{Proceedings of the 38th AAAI Conference on Artificial Intelligence (AAAI-24)}, vol.\ 38(13), pp.\ 14457--14465, 2024.
+
+  \item \me, Buqing Nie, Yue Gao, ``DAGA: Dynamics-Aware Reinforcement Learning with Graph-Based Rapid Adaptation,'' \textit{IEEE Robotics and Automation Letters}, 8(4):2189--2196, 2023.
+\end{itemize}
+
+% =========================== EXPERIENCE ======================================
+\section{Work Experience}
+\daterow{\textbf{Game AI Algorithm Intern} \textbullet\ NetEase AI Lab}{Apr.\ 2023 -- Aug.\ 2023}
+\vspace{1pt}
+\begin{itemize}
+  \item Developed a Game AI training framework based on curriculum learning and self-play algorithms.
+  \item Implemented a distributed reinforcement learning framework using CPU clusters and multi-GPUs.
+  \item Employed Elo score to identify the optimal diverse and effective models; maintained a long-term model pool to enhance self-play performance.
+  \item Achieved 1st place in the Olympic competition at IJCAI.
+\end{itemize}
+
+% =========================== SERVICE & AWARDS ================================
+\section{Service \& Awards}
+\begin{itemize}
+  \item \textbf{Best Paper Award on Robot Learning}, ICRA 2026 (for ``Do You Know Where Your Camera Is?'').
+  \item Teaching Assistant, \textit{Artificial Intelligence: Theory and Applications}, 2023: designed a reinforcement learning project, held interactive Q\&A sessions, and gave feedback on assignments.
+  \item China Scholarship Council (CSC) Scholarship, 2020--2022.
+  \item Academic Excellence Scholarship, 2019.
+\end{itemize}
+
+% =========================== SKILLS ==========================================
+\section{Skills}
+\begin{itemize}
+  \item \textbf{Languages:} Mandarin (native); French (DELF B2); English (TOEFL 110, GRE 163V/170Q/4.0AW; extensive scientific writing experience).
+  \item \textbf{Programming:} Python, C++, Java.
+\end{itemize}
+
+\end{document}

@@ -41,8 +41,27 @@ const personLd = {
   "@type": "Person",
   name: site.name,
   jobTitle: site.role,
-  affiliation: { "@type": "Organization", name: site.university },
+  description: site.description,
+  image: new URL(withBase("/og.jpg"), site.url).href,
   url: site.url,
+  affiliation: {
+    "@type": "CollegeOrUniversity",
+    name: site.university,
+    ...(site.universityUrl ? { url: site.universityUrl } : {}),
+  },
+  alumniOf: [
+    { "@type": "CollegeOrUniversity", name: "Shanghai Jiao Tong University" },
+    { "@type": "CollegeOrUniversity", name: "École Polytechnique" },
+  ],
+  knowsAbout: [
+    "Robotics",
+    "Machine Learning",
+    "Robot Learning",
+    "Reinforcement Learning",
+    "Imitation Learning",
+  ],
+  // sameAs consolidates your identity across the web (Scholar, GitHub, …) so
+  // search engines treat these profiles + this site as the same person.
   sameAs: Object.values(site.socials).filter(Boolean),
 };
 ---

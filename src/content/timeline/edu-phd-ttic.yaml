@@ -1,0 +1,9 @@
+role: "Ph.D. in Computer Science (Robotics)"
+org: "Toyota Technological Institute at Chicago (TTIC)"
+location: "Chicago, IL"
+start: "2024-09"
+type: "education"
+summary: "Robot learning in the Robot Intelligence through Perception Lab (RIPL), advised by Prof. Matthew R. Walter."
+tags:
+  - "robot-learning"
+  - "machine-learning"

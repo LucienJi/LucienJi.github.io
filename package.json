@@ -9,7 +9,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check"
+    "check": "astro check",
+    "cv": "latexmk -pdf -cd -halt-on-error -interaction=nonstopmode cv/cv.tex",
+    "cv:publish": "npm run cv && cp cv/cv.pdf public/cv.pdf"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
