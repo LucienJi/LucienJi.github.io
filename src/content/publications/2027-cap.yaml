@@ -1,0 +1,24 @@
+title: "CAP: Codebook-Aligned Prediction for Tokenized Robot Policies"
+authors:
+  - "Haoran Chen*"
+  - "Jingtian Ji*"
+  - "Samuel Wheeler"
+  - "Kaylene Caswell Stocking"
+  - "Matthew R. Walter"
+venue: "Under review at ICRA"
+year: 2027
+type: "preprint"
+links:
+  arxiv: "https://arxiv.org/abs/2610.09178"
+  project: "/research/cap"
+  website: "https://ripl.github.io/action-tokenization-web/cap/"
+  bibtex: "@misc{chen2026cap,\n  title={CAP: Codebook-Aligned Prediction for Tokenized Robot Policies},\n  author={Chen, Haoran and Ji, Jingtian and Wheeler, Samuel and Stocking, Kaylene Caswell and Walter, Matthew R.},\n  year={2026},\n  eprint={2610.09178},\n  archivePrefix={arXiv}\n}"
+oneLiner: "Reusing the action tokenizer's codebook as the policy's class prototypes makes token errors more benign and improves success across quantizers, benchmarks, and real robots."
+tags:
+  - "action-tokenization"
+  - "vision-language-action"
+  - "imitation-learning"
+  - "robot-learning"
+  - "manipulation"
+teaser: "projects/cap/teaser.png"
+selected: true

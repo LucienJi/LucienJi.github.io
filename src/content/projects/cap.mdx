@@ -1,0 +1,31 @@
+---
+title: "CAP: Codebook-Aligned Prediction for Tokenized Robot Policies"
+summary: "Tokenized robot policies usually keep an action tokenizer's token indices and drop its learned code vectors. CAP reuses those code vectors as the policy's class prototypes, which makes prediction errors more benign and improves task success across four quantizer families, three simulation benchmarks, and two real-robot tasks."
+year: 2027
+cover: "projects/cap/teaser.png"
+tags:
+  - "action-tokenization"
+  - "vision-language-action"
+  - "imitation-learning"
+  - "robot-learning"
+  - "manipulation"
+links:
+  arxiv: "https://arxiv.org/abs/2610.09178"
+  website: "https://ripl.github.io/action-tokenization-web/cap/"
+selected: true
+draft: false
+---
+
+## Abstract
+
+Action tokenization converts continuous robot actions into discrete symbols that an autoregressive policy can model, the same next-token interface that vision-language-action (VLA) models use for language. Existing tokenizer-based policies, however, ignore the tokenizer's learned latent code structure: once actions are tokenized, the policy treats tokens as unrelated class indices and learns a new classifier from scratch. CAP shows that this discarded structure is valuable. It directly reuses the tokenizer's code vectors as the policy's class prototypes, leaving the tokenizer and the policy backbone unchanged, so reconstruction quality is held fixed and only the prediction head differs.
+
+## Method
+
+An action tokenizer encodes an action chunk into a sequence of tokens, one per quantization level, and learns a codebook of latent code vectors alongside the token mapping. A standard autoregressive policy predicts each token with a learnable linear classifier supervised by token indices. CAP parametrizes that categorical classifier with the tokenizer's own code space: the policy projects its output at each level, and tokens whose codebook vectors are closer to the projection receive higher probability. The training objective (teacher-forced cross-entropy on token indices) is unchanged. Two variants are studied: frozen CAP (CAP-FRZ) keeps the prototypes fixed at their tokenizer values, and fine-tuned CAP (CAP-FT) updates them through the policy loss. CAP works with learned-codebook quantizers (VQ, RVQ, NRVQ) and lookup-free quantizers (FSQ), with shared or level-specific codebooks, for eight tokenizer configurations in total.
+
+## Results
+
+CAP is evaluated on RoboMimic (Lift, Square, Can), all four LIBERO suites (40 tasks), three RoboTwin tasks, and two real-robot tasks, hanging a cup on a rack and stacking a cube, against single-head and multi-head classification baselines that share the same backbone, frozen tokenizer, data, and training protocol. A CAP variant outperforms both baselines in 23 of the 24 benchmark-tokenizer combinations. Averaged over the eight quantizers, CAP-FRZ and CAP-FT improve success rates over the matched baseline by 8.2 and 9.0 percentage points on RoboMimic, 19.0 and 13.8 on LIBERO, and 5.8 and 13.7 on RoboTwin.
+
+The analysis explains where the gains come from. CAP does not raise token prediction accuracy; its prediction errors are more benign once decoded into action space, and its policies are more robust to observation perturbations. Controlled ablations show that distance-based scoring or a low-rank head alone does not reproduce the gains, and a permuted-codebook control performs substantially worse. Preserving the action-aware alignment between code vectors and token labels is what matters, which suggests action tokenizers learn latent structure that downstream policies should keep.

@@ -1,0 +1,33 @@
+---
+title: "Beyond Reconstruction: What Matters in Action Tokenization for Robot Policies?"
+summary: "Accurate reconstruction is only one part of a good action tokenizer. A study of 22 learned tokenizers shows that predictability and robustness to mismatched tokens also decide rollout success, and ProAct trains tokenizers for both, improving Robomimic, LIBERO, and RoboTwin by 11.3 points on average, a VLA by 21.8, and real-robot manipulation by 36.7."
+year: 2027
+cover: "projects/proact/teaser.jpg"
+tags:
+  - "action-tokenization"
+  - "vision-language-action"
+  - "imitation-learning"
+  - "robot-learning"
+  - "manipulation"
+links:
+  arxiv: "https://arxiv.org/abs/2610.09170"
+  website: "https://ripl.github.io/action-tokenization-web/proact/"
+selected: true
+draft: false
+---
+
+## Abstract
+
+Autoregressive action-token policies, including vision-language-action (VLA) models, rely on an action tokenizer to translate discrete token sequences into precise continuous control. Most learned tokenizers are trained only to reconstruct actions. This paper shows through extensive analysis that sufficiently accurate reconstruction is only one part of what makes a downstream policy succeed: the policy must also be able to predict the right tokens for new observations, and the token sequences it actually produces, including ones it never saw in training, must still decode into reasonable actions. Neither property is directly encouraged by a reconstruction objective. ProAct (Predictable and Robust Action Tokenization) is a tokenizer training method that augments reconstruction to target both.
+
+## What matters
+
+A controlled study of 22 learned action tokenizers (849 tokenizer-policy runs on Robomimic alone) varies reconstruction fidelity, nominal bitrate, chunk size, and execution horizon. Sufficient reconstruction accuracy is necessary for successful rollouts, but beyond that point better reconstruction does not reliably predict better downstream performance; chunk size, token predictability, and mismatch severity also matter. Autoregressive policies routinely compose complete token sequences that never appear in the encoded demonstrations. A one-step error decomposition separates matched predictions from token mismatches and reveals the gap: standard tokenizer and policy objectives reward accurate reconstruction and target prediction, and leave the action-space severity of mismatched predictions uncontrolled.
+
+## Method
+
+ProAct adds two tokenizer-only training components. Token Balance Regularization makes the encoded targets easier for the downstream policy to predict. Token Perturbation trains the tokenizer to reconstruct each action from perturbed versions of its own token sequence (using a straight-through estimator), so a mismatched token still decodes to a nearby action. Both are policy-agnostic: they need only the action dataset, with no access to the downstream policy or observations.
+
+## Results
+
+Across Robomimic, LIBERO, and RoboTwin and a diverse set of tokenizer architectures, ProAct improves rollout success by an average of 11.3 percentage points. The gains carry over to a VLA policy on LIBERO (21.8 points) and to real-world manipulation, cube stacking and cup hanging (36.7 points). Ablations on Robomimic show that each component improves rollout success on its own and that combining them performs best. Effective action tokenization should be designed as a policy interface that balances fidelity, predictability, and robustness.

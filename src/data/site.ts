@@ -70,7 +70,7 @@ export const site: SiteConfig = {
   advisor: "Matthew R. Walter",
   advisorUrl: "https://home.ttic.edu/~mwalter/",
   location: "Chicago, IL",
-  now: "", // set a short status to show it on the hero (e.g. "Seeking summer 2026 internships")
+  now: "Seeking Summer 2027 research internships", // set a short status to show it on the hero (e.g. "Seeking summer 2026 internships")
   email: "jijingtian@ttic.edu",
 
   socials: {

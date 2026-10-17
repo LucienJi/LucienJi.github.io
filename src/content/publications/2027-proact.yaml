@@ -1,0 +1,24 @@
+title: "Beyond Reconstruction: What Matters in Action Tokenization for Robot Policies?"
+authors:
+  - "Haoran Chen*"
+  - "Jingtian Ji*"
+  - "Samuel Wheeler"
+  - "Kaylene Caswell Stocking"
+  - "Matthew R. Walter"
+venue: "Under review at ICLR"
+year: 2027
+type: "preprint"
+links:
+  arxiv: "https://arxiv.org/abs/2610.09170"
+  project: "/research/proact"
+  website: "https://ripl.github.io/action-tokenization-web/proact/"
+  bibtex: "@misc{chen2026beyond,\n  title={Beyond Reconstruction: What Matters in Action Tokenization for Robot Policies?},\n  author={Chen, Haoran and Ji, Jingtian and Wheeler, Samuel and Stocking, Kaylene Caswell and Walter, Matthew R.},\n  year={2026},\n  eprint={2610.09170},\n  archivePrefix={arXiv}\n}"
+oneLiner: "Action tokenizers should be trained as a policy interface: ProAct makes tokens easier to predict and robust to mispredictions, lifting success on Robomimic, LIBERO, RoboTwin, a VLA, and a real robot."
+tags:
+  - "action-tokenization"
+  - "vision-language-action"
+  - "imitation-learning"
+  - "robot-learning"
+  - "manipulation"
+teaser: "projects/proact/teaser.jpg"
+selected: true

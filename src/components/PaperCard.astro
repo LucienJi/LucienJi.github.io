@@ -8,6 +8,8 @@
  *   • title   — serif <h3>, linked to links.project (a logical/internal path)
  *               → else links.pdf → else links.arxiv; plain text when none.
  *   • authors — serif line; the author whose string === site.name is <strong>.
+ *               A trailing "*" marks equal contribution: it renders as a
+ *               superscript and adds a one-line "Equal contribution" note.
  *   • venue   — <VenueBadge venue year type award>. NOTE: VenueBadge already
  *               renders `award` as its cobalt sub-tag, so the award badge is
  *               shown here once and never duplicated.
@@ -72,6 +74,13 @@ const bibtex =
   links?.bibtex && links.bibtex.trim() !== "" ? links.bibtex : undefined;
 
 const hasRow = linkRow.length > 0 || Boolean(bibtex);
+
+// "Name*" = equal contribution; the bare name is what gets matched and shown.
+const authorList = authors.map((raw) => {
+  const equal = raw.endsWith("*");
+  return { name: equal ? raw.slice(0, -1).trim() : raw, equal };
+});
+const hasEqual = authorList.some((a) => a.equal);
 ---
 
 <Card>
@@ -95,13 +104,15 @@ const hasRow = linkRow.length > 0 || Boolean(bibtex);
 
     <p class="paper__authors">
       {
-        authors.map((author, i) => (
+        authorList.map((author, i) => (
           <Fragment>
             {i > 0 && ", "}
-            {author === site.name ? <strong>{author}</strong> : author}
+            {author.name === site.name ? <strong>{author.name}</strong> : author.name}
+            {author.equal && <sup>*</sup>}
           </Fragment>
         ))
       }
+      {hasEqual && <span class="paper__equal">* Equal contribution</span>}
     </p>
 
     <div class="paper__venue">
@@ -164,6 +175,15 @@ const hasRow = linkRow.length > 0 || Boolean(bibtex);
   .paper__authors strong {
     color: var(--ink);
     font-weight: 600;
+  }
+  .paper__authors sup {
+    font-size: 0.75em;
+    line-height: 0;
+  }
+  .paper__equal {
+    display: block;
+    font-size: var(--fs-meta);
+    color: var(--faint);
   }
 
   /* Block wrapper so the inline-flex VenueBadge hugs the left edge. */
