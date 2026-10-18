@@ -1,0 +1,17 @@
+title: "Compose Your Oracles: Off Policy Improvement with Aggregated Guidance"
+authors:
+  - "Jingtian Ji"
+  - "Xuefeng Liu"
+  - "Matthew R. Walter"
+venue: "NeurIPS"
+year: 2026
+type: "conference"
+links:
+  code: "https://github.com/LucienJi/OPI"
+oneLiner: "OPI improves a reinforcement-learning policy off-policy by pooling actions from several imperfect oracles and the learner itself, scoring them with source-aware critics."
+tags:
+  - "reinforcement-learning"
+  - "off-policy-rl"
+  - "learning-from-oracles"
+  - "robot-learning"
+selected: true
